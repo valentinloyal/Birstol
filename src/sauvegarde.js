@@ -59,6 +59,11 @@ export function lireSauvegarde(texte) {
           q: c.q.trim(),
           a: c.a.trim(),
           box: c.box === 1 || c.box === 2 ? c.box : 0,
+          // La programmation des révisions fait partie de la sauvegarde : la
+          // perdre remettrait tout le paquet à réviser aujourd'hui. Absente
+          // d'une vieille sauvegarde, elle sera reconstruite par la migration.
+          ...(Number.isFinite(c.interval) ? { interval: c.interval } : {}),
+          ...(Number.isFinite(c.due) ? { due: c.due } : {}),
         })),
     }));
 

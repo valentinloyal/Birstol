@@ -7,7 +7,11 @@ const paquet = (nom, fiches) => ({
   name: nom,
   created: 1755300000000,
   lastStudied: 1755330000000,
-  cards: fiches.map((f, i) => ({ id: "c" + i, q: f[0], a: f[1], box: f[2] ?? 0 })),
+  cards: fiches.map((f, i) => ({
+    id: "c" + i, q: f[0], a: f[1], box: f[2] ?? 0,
+    interval: [1, 3, 7][f[2] ?? 0],
+    due: 1755400000000 + i,
+  })),
 });
 
 const BASE = [
@@ -53,6 +57,20 @@ test("exporter puis restaurer rend exactement la meme base", () => {
 
 test("le tableau nu de localStorage est accepte tel quel", () => {
   assert.deepEqual(lireSauvegarde(JSON.stringify(BASE)), BASE);
+});
+
+test("la programmation des revisions survit a l'aller-retour", () => {
+  // La perdre remettrait toute la base a reviser aujourd'hui, en silence.
+  const relu = lireSauvegarde(JSON.stringify(construireSauvegarde(BASE)));
+  assert.deepEqual(relu[0].cards.map((c) => [c.interval, c.due]),
+                   BASE[0].cards.map((c) => [c.interval, c.due]));
+});
+
+test("une sauvegarde d'avant les dates ne s'invente pas d'echeance", () => {
+  // Sans due ni interval, c'est la migration au chargement qui completera.
+  const paquets = lireSauvegarde(JSON.stringify([{ name: "Ancien", cards: [{ q: "a", a: "b", box: 2 }] }]));
+  assert.equal("due" in paquets[0].cards[0], false);
+  assert.equal("interval" in paquets[0].cards[0], false);
 });
 
 /* ------------------------------------------------------------------ */
