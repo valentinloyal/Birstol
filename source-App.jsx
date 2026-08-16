@@ -24,7 +24,8 @@ const CSS = `
   display:flex; justify-content:center;
 }
 .bx-shell { width:100%; max-width:520px; height:100%; display:flex; flex-direction:column; position:relative; }
-.bx button { font-family:inherit; font-size:inherit; color:inherit; background:none; border:none; cursor:pointer; }
+.bx button { font-family:inherit; font-size:inherit; color:inherit; background-color:transparent; border:none; cursor:pointer; }
+/* NB : ici on ne remet a zero que la couleur de fond. Le raccourci complet effacerait aussi les degrades des boutons. */
 .bx :focus-visible { outline:2px solid var(--or); outline-offset:3px; border-radius:4px; }
 .bx input, .bx textarea { font-family:inherit; font-size:16px; }
 
@@ -382,6 +383,13 @@ export default function Bristol() {
     say(`${made.length} paquet${made.length > 1 ? "s" : ""} · ${n} fiches importées`);
   };
 
+  const newDeck = (name) => {
+    const d = { id: uid(), name, cards: [], created: Date.now() };
+    commit([d, ...decks]);
+    setSheet(null);
+    setView({ name: "deck", id: d.id, draft: true });
+  };
+
   const updateDeck = (id, patch) => commit(decks.map((d) => (d.id === id ? { ...d, ...patch } : d)));
   const removeDeck = (id) => { commit(decks.filter((d) => d.id !== id)); setView({ name: "home" }); setSheet(null); };
 
@@ -394,7 +402,9 @@ export default function Bristol() {
         )}
         {view.name === "deck" && deck && (
           <DeckView
+            key={deck.id}
             deck={deck}
+            startDraft={!!view.draft}
             onBack={() => setView({ name: "home" })}
             onUpdate={(p) => updateDeck(deck.id, p)}
             onStudy={(filter) => setView({ name: "study", id: deck.id, filter })}
@@ -411,6 +421,7 @@ export default function Bristol() {
         )}
 
         {sheet?.type === "install" && <InstallSheet onClose={() => setSheet(null)} />}
+        {sheet?.type === "new" && <NewDeckSheet onClose={() => setSheet(null)} onCreate={newDeck} />}
         {sheet?.type === "import" && <ImportSheet onClose={() => setSheet(null)} onDone={addDecks} />}
         {sheet?.type === "menu" && deck && (
           <MenuSheet
@@ -477,7 +488,7 @@ function Home({ decks, ready, onOpen, onSheet }) {
       </div>
 
       <div className="foot">
-        <button className="btn btn-s" onClick={() => onSheet({ type: "import", mode: "new" })}>Nouveau paquet</button>
+        <button className="btn btn-s" onClick={() => onSheet({ type: "new" })}>Créer à la main</button>
         <button className="btn btn-p" onClick={() => onSheet({ type: "import" })}>Importer</button>
       </div>
     </>
@@ -495,8 +506,8 @@ function relative(t) {
 }
 
 /* ------------------------------ un paquet ------------------------------ */
-function DeckView({ deck, onBack, onUpdate, onStudy, onSheet }) {
-  const [draft, setDraft] = useState(null);
+function DeckView({ deck, startDraft, onBack, onUpdate, onStudy, onSheet }) {
+  const [draft, setDraft] = useState(startDraft ? { q: "", a: "" } : null);
   const qRef = useRef(null);
   const restants = deck.cards.filter((c) => (c.box || 0) < 2).length;
 
@@ -518,7 +529,7 @@ function DeckView({ deck, onBack, onUpdate, onStudy, onSheet }) {
         <button className="iconbtn" onClick={onBack} aria-label="Retour"><Ico d={I.back} /></button>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div className="sub">{deck.cards.length} fiches</div>
-          <h1 className="display" style={{ fontSize: 23, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", color: "var(--clair)" }}>{deck.name}</h1>
+          <h1 className="display" style={{ fontSize: 21, color: "var(--clair)", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", wordBreak: "break-word" }}>{deck.name}</h1>
         </div>
         <button className="iconbtn" onClick={() => onSheet({ type: "menu" })} aria-label="Options du paquet"><Ico d={I.more} /></button>
       </div>
@@ -694,6 +705,27 @@ function Study({ deck, filter, onUpdate, onQuit }) {
           <div className="hint">Touchez la fiche pour voir la réponse</div>
         </div>
       )}
+    </div>
+  );
+}
+
+/* ------------------------------ paquet vide ------------------------------ */
+function NewDeckSheet({ onClose, onCreate }) {
+  const [name, setName] = useState("");
+  return (
+    <div className="sheet-bg" onClick={onClose}>
+      <div className="sheet" onClick={(e) => e.stopPropagation()}>
+        <div className="grip" />
+        <h2 className="display">Créer à la main</h2>
+        <p className="lede">Un paquet vide, puis vous saisissez vos fiches une par une.</p>
+        <input className="field" value={name} autoFocus placeholder="Nom du paquet"
+          onChange={(e) => setName(e.target.value)}
+          onKeyDown={(e) => { if (e.key === "Enter" && name.trim()) onCreate(name.trim()); }} />
+        <button className="btn btn-p" style={{ marginTop: 16 }} disabled={!name.trim()}
+          onClick={() => onCreate(name.trim())}>
+          Créer et ajouter une fiche
+        </button>
+      </div>
     </div>
   );
 }
