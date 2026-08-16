@@ -23,8 +23,12 @@ export function Connexion({ onConnecte }) {
       const { error } = await client.auth.emailOtp.sendVerificationOtp({ email: email.trim(), type: "sign-in" });
       if (error) throw error;
       setEtape("code");
-    } catch {
-      setErreur("Impossible d'envoyer le code. Vérifiez l'adresse.");
+    } catch (err) {
+      // Le message reste vague à l'écran, mais la vraie cause part en
+      // console : sans ça, un échec de l'expéditeur (débit limité sur le
+      // palier gratuit) et une adresse invalide sont indiscernables.
+      console.error("envoi du code :", err);
+      setErreur("Impossible d'envoyer le code pour l'instant. Réessayez dans une minute.");
     } finally {
       setEnCours(false);
     }
