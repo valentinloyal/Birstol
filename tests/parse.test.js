@@ -167,15 +167,15 @@ test("une seule ligne sans separateur : rien", () => {
 });
 
 /* ------------------------------------------------------------------ */
-/*  Defauts connus, corriges au commit suivant                         */
+/*  Cas qui ont ete des defauts, verrouilles ici                       */
 /* ------------------------------------------------------------------ */
 
-test("un CSV avec en-tete ne doit pas produire de fiche parasite", { todo: true }, () => {
+test("un CSV avec en-tete ne doit pas produire de fiche parasite", () => {
   const r = parseText("question;reponse\nQue fait javac ?;Il compile\nUn paquet ?;Un espace de noms", "Secours");
   assert.deepEqual(paires(r), [["Que fait javac ?", "Il compile"], ["Un paquet ?", "Un espace de noms"]]);
 });
 
-test("une question contenant du code Java ne doit pas etre coupee sur ses ;", { todo: true }, () => {
+test("une question contenant du code Java ne doit pas etre coupee sur ses ;", () => {
   const r = parseText('Que fait int x = 5; ? ; Declare un entier\nQue fait System.out.println("a"); ? ; Affiche a', "Secours");
   assert.deepEqual(paires(r), [
     ["Que fait int x = 5; ?", "Declare un entier"],
@@ -183,7 +183,20 @@ test("une question contenant du code Java ne doit pas etre coupee sur ses ;", { 
   ]);
 });
 
-test("un fichier binaire ne doit produire aucune fiche", { todo: true }, () => {
+test("code Java et en-tete de CSV dans le meme fichier", () => {
+  // Cas surpris au navigateur : la ligne d'en-tete, ecrite sans espaces, faisait
+  // gagner le point-virgule nu au comptage, qui recoupait tout le fichier a tort.
+  const r = parseText(
+    "question;reponse\nQue fait int x = 5; ? ; Declare un entier x\nRole de javac ; Compiler en bytecode",
+    "Secours"
+  );
+  assert.deepEqual(paires(r), [
+    ["Que fait int x = 5; ?", "Declare un entier x"],
+    ["Role de javac", "Compiler en bytecode"],
+  ]);
+});
+
+test("un fichier binaire ne doit produire aucune fiche", () => {
   const png = String.fromCharCode(0x89) + "PNG" + String.fromCharCode(13, 10, 26, 10) + "IHDR" + String.fromCharCode(0, 0, 1, 44);
   assert.equal(parseText(png, "Secours"), null);
 });

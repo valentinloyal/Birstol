@@ -91,17 +91,26 @@ pour l'instant — voir la feuille de route.
 
 ### Parseur d'import (`parseText`)
 
-Cœur fragile du projet, à couvrir de tests en priorité. Essaie dans l'ordre :
+Cœur fragile du projet, couvert par `tests/parse.test.js` (30 tests, `npm test`).
+Toute modification passe par un test d'abord. Essaie dans l'ordre :
 
 1. **JSON** — tableau d'objets, clés acceptées : `q|question|recto`, `a|r|answer|reponse|réponse|verso`.
 2. **Blocs `Q:` / `R:`** — détectés si les deux préfixes coexistent ; réponses multilignes possibles.
 3. **Une fiche par ligne** — séparateur élu par score parmi
    `["::", "\t", " | ", "|", ";", " — ", " - ", ","]`, retenu si ≥ 60 % des lignes
-   l'utilisent. La coupure se fait à la **première** occurrence.
+   l'utilisent. La coupure se fait à la première occurrence **entourée d'espaces**
+   s'il en existe une sur la ligne, sinon à la première occurrence tout court.
+   C'est ce qui permet à `Que fait int x = 5; ? ; Déclare un entier` d'être coupé
+   au bon endroit : le point-virgule du code Java n'est pas un séparateur.
 4. **Blocs séparés par une ligne vide** — 1re ligne = question, le reste = réponse.
 
 Un fichier = un paquet ; le nom du fichier (sans extension, `_`/`-` → espaces) devient
 le nom du paquet. Les lignes commençant par `#` sont ignorées, ce qui sert de commentaire.
+
+Deux garde-fous : une **ligne d'en-tête de CSV** (`question;réponse`) est retirée si
+elle est en tête et qu'il reste des fiches derrière ; un **fichier binaire** (présence
+d'un NUL, ou plus de 1 % de caractères de contrôle) est refusé au lieu de produire
+une fiche de charabia.
 
 Le format attendu des LLM est documenté dans `bristol-format-fiches.md`, hors dépôt,
 utilisé comme connaissance de projet côté Claude.
