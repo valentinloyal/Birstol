@@ -54,8 +54,8 @@ src/main.jsx            point d'entrée : montage React + enregistrement du SW
 package.json            dépendances de build + script `npm run build`
 sw.js                   cache-first ; constante CACHE = "bristol-vN"
 manifest.webmanifest    PWA : nom, icônes, standalone, thème #2A0F4C
-icon-{192,512}.png      icônes générées (Pillow)
-icon-maskable-512.png   variante à marge large pour Android
+icon-{192,512}.png      fiche crème, marge orange, B en Archivo Black Italic sur violet
+icon-maskable-512.png   même dessin, contenu resserré dans la zone sûre d’Android
 publier.bat             crée le dépôt GitHub + active Pages (première fois)
 maj.bat                 git add / commit / push (usage courant)
 .nojekyll               désactive Jekyll sur Pages
@@ -157,6 +157,12 @@ utilisé comme connaissance de projet côté Claude.
 - **Archivo Black Italic** remplace *NaN Jaune Maxi*, la fonte voulue, qui est
   commerciale. Si le `.woff2` est acheté un jour : le déposer dans le dépôt et changer
   la seule variable `--ui`.
+- **Les icônes doivent tenir dans la zone sûre d’Android** : un cercle centré de
+  80 % du côté. Une icône carrée pleine est traitée comme une icône ancienne par le
+  lanceur Samsung, qui lui fabrique un fond bleu marine — c’est ce qui donnait un
+  logo et un écran de chargement hors charte, alors que le manifeste annonçait
+  pourtant le bon violet. Après changement d’icône, il faut **désinstaller et
+  réinstaller** la PWA : Android garde son paquet généré plusieurs heures.
 - Pas de `localStorage` dans les artefacts Claude.ai — mais ici, en production, c'est
   le stockage normal et voulu.
 
