@@ -38,6 +38,11 @@ export const CSS = `
   background-color:var(--violet2); transition:transform .12s; }
 .iconbtn:active { transform:scale(.92); }
 .scroll { flex:1 1 auto; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:0 18px 150px; }
+/* L accueil est une colonne, pour que le bloc Astuces puisse etre pousse en bas. */
+/* Le bloc Astuces ferme toujours la liste : la reserve sous lui n a besoin que
+   de degager le pied, pas de laisser respirer une fiche coupee. */
+.scroll-accueil { display:flex; flex-direction:column; padding-bottom:104px; }
+.scroll-accueil > * { flex:0 0 auto; }
 
 /* --- compteurs --- */
 .tally { display:flex; gap:8px; margin:2px 0 20px; }
@@ -164,9 +169,15 @@ export const CSS = `
 .row.en-pause .a { color:var(--or); }
 
 /* --- astuces --- */
-.astuces-bloc { display:flex; align-items:center; gap:12px; width:100%; text-align:left; border-radius:14px;
-  padding:13px 14px; margin:6px 0 4px; background-color:var(--violet2);
-  box-shadow:inset 0 0 0 1.5px var(--violet3); transition:transform .12s; }
+.astuces-bloc { display:flex; align-items:center; gap:12px; width:100%; max-width:100%; text-align:left;
+  border-radius:14px; padding:13px 14px; margin:18px 0 4px; overflow:hidden;
+  background-color:var(--violet2); box-shadow:inset 0 0 0 1.5px var(--violet3); transition:transform .12s;
+  /* margin-top:auto pousse le bloc en bas de la zone defilante quand le contenu
+     est court ; il reste sous la liste des paquets quand elle est longue. */
+  margin-top:auto; }
+/* Sans min-width:0 un enfant de flex ne descend pas sous la largeur de son
+   texte : le bloc debordait de l ecran au lieu de tronquer la ligne. */
+.astuces-bloc > span:not(.pastille) { min-width:0; overflow:hidden; }
 .astuces-bloc:active { transform:scale(.985); }
 .astuces-bloc .pastille { width:34px; height:34px; border-radius:11px; display:grid; place-items:center; flex:0 0 auto;
   color:#2A0F4C; background-color:var(--or); }
@@ -210,6 +221,18 @@ export const CSS = `
   padding:0; white-space:pre; }
 .cours blockquote { margin:0 0 14px; padding:2px 0 2px 14px; border-left:2.5px solid var(--violet3);
   color:var(--sourdine); font-style:italic; }
+
+/* Navigation de section a section, en fin de lecture. */
+.suite { display:flex; flex-direction:column; gap:8px; margin:26px 0 6px; padding-top:18px;
+  border-top:1px solid var(--violet2); }
+.suite button { display:block; width:100%; text-align:left; border-radius:13px; padding:12px 14px;
+  font-family:var(--ui); background-color:var(--violet2); transition:transform .12s; }
+.suite button:active { transform:scale(.985); }
+.suite button.prochaine { color:#2A0F4C; background-color:var(--or); }
+.suite small { display:block; font-family:var(--mono); font-size:10px; letter-spacing:.14em;
+  text-transform:uppercase; opacity:.7; margin-bottom:2px; }
+.suite b { display:block; font-size:15px; font-weight:700; letter-spacing:-.01em; }
+.suite .fin { margin:0; padding:10px 2px; font-family:var(--ui); font-size:13px; color:var(--sourdine); text-align:center; }
 
 /* --- recherche dans un paquet --- */
 .chercher { display:flex; align-items:center; gap:9px; border-radius:13px; padding:0 12px; margin-bottom:12px;

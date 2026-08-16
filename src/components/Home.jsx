@@ -27,7 +27,7 @@ export function Home({ decks, ready, onOpen, onJour, onSheet }) {
         </button>
       </div>
 
-      <div className="scroll">
+      <div className="scroll scroll-accueil">
         {decks.length > 0 && (
           <div className="tally">
             <div><b>{decks.length}</b><span>Paquets</span></div>

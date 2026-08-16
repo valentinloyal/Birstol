@@ -49,6 +49,9 @@ export function Cours({ deck, sectionVisee, onBack, onImporter, onReviser, onMen
 
   const partie = parties.find((s) => s.id === ouverte) || parties[0] || null;
   const aReviser = partie ? compterSection(deck, partie.id) : 0;
+  const rang = partie ? parties.findIndex((s) => s.id === partie.id) : -1;
+  const precedente = rang > 0 ? parties[rang - 1] : null;
+  const suivante = rang >= 0 && rang < parties.length - 1 ? parties[rang + 1] : null;
 
   /* Sélection dans le cours : lire, repérer un passage, en faire une fiche.
      La barre s'affiche en BAS de l'écran et non près du texte : sur Android,
@@ -103,6 +106,25 @@ export function Cours({ deck, sectionVisee, onBack, onImporter, onReviser, onMen
           <>
             <h3>{partie.titre}</h3>
             <Corps corps={partie.corps} />
+
+            {/* Navigation en fin de lecture : on arrive au bout d'une section,
+                on enchaîne sans remonter chercher le sommaire tout en haut. */}
+            <div className="suite">
+              {precedente && (
+                <button onClick={() => setOuverte(precedente.id)}>
+                  <small>Section précédente</small>
+                  <b>{precedente.titre}</b>
+                </button>
+              )}
+              {suivante ? (
+                <button className="prochaine" onClick={() => setOuverte(suivante.id)}>
+                  <small>Section suivante</small>
+                  <b>{suivante.titre}</b>
+                </button>
+              ) : (
+                <p className="fin">Fin du cours.</p>
+              )}
+            </div>
           </>
         )}
       </div>
