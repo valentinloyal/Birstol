@@ -180,14 +180,31 @@ une fiche de charabia.
 
 ### Partage Android (`share_target`)
 
-Déclaré en **GET** dans le manifeste : Android rouvre l'app avec le texte partagé
-en paramètre d'URL, sans service worker. Le texte reçu **n'est jamais importé tout
-seul** : il ouvre la feuille d'import déjà remplie, sur l'onglet texte. On partage
-vite une phrase ou un lien par mégarde, et le parseur en tirerait une fiche parasite
-sans rien dire — vu à l'essai, une phrase contenant une virgule suffisait.
+Déclaré en **POST multipart** dans le manifeste, la seule forme qui permette de
+recevoir des fichiers. Le chemin est en trois temps :
 
-Le partage de **fichiers** n'est pas fait : il impose un POST intercepté par le
-service worker, qui ne peut se vérifier que sur un téléphone.
+1. Android poste le partage sur `./partage`.
+2. `sw.js` intercepte ce POST, vide le formulaire dans un cache dédié
+   (`bristol-partage`), et redirige vers `./index.html?partage=recu`.
+3. `partage.js` relève cette boîte au démarrage, **la vide**, et ouvre la feuille
+   d'import déjà remplie.
+
+Trois précautions à ne pas défaire :
+
+- Le cache `bristol-partage` **doit être épargné** par le ménage de l'événement
+  `activate`, qui efface tous les caches sauf `CACHE`. Le POST arrive avant que la
+  page ne soit ouverte : effacer ce cache perdrait le partage.
+- `recevoirPartage` est entièrement enveloppée dans un `try` et redirige **quoi
+  qu'il arrive**. Sans cela, un partage mal formé laisserait l'utilisateur sur une
+  page d'erreur du serveur au lieu de l'app.
+- Le contenu reçu **n'est jamais importé tout seul** : il ouvre la feuille d'import
+  pré-remplie. On partage vite une phrase ou un lien par mégarde, et le parseur en
+  tirerait une fiche parasite sans rien dire — vu à l'essai, une phrase contenant
+  une virgule suffisait.
+
+**Le POST ne se vérifie que sur un téléphone** : le service worker ne s'enregistre
+pas dans l'environnement de vérification local. Ce qui a été vérifié ici, c'est la
+relève de la boîte et tout ce qui suit, en y déposant un partage à la main.
 
 Le format attendu des LLM est documenté dans `bristol-format-fiches.md`, hors dépôt,
 utilisé comme connaissance de projet côté Claude.

@@ -38,10 +38,9 @@ Rien de visible pour l'utilisateur, tout de visible pour la suite.
 
 ## Étape 2 — Confort de saisie (1 jour)
 
-9. **Web Share Target** — *à moitié fait le 18 août 2026.* Le partage de **texte**
-   fonctionne : Android rouvre l'app, qui présente la feuille d'import déjà remplie.
-   Le partage de **fichiers** reste à faire : il impose un POST intercepté par le
-   service worker, qui ne se vérifie que sur un téléphone.
+9. ~~**Web Share Target**~~ — fait le 18 août 2026, texte et fichiers, en POST
+   multipart intercepté par le service worker. **À confirmer sur le téléphone** :
+   le service worker ne s'enregistre pas dans l'environnement de vérification.
 10. ~~**Fusionner dans un paquet existant** à l'import~~ — fait le 18 août 2026.
 11. **Détection des doublons et des quasi-doublons** à l'import — utile : le paquet Java
     contient déjà deux fiches dont la réponse est la même paire bytecode/`.class`.

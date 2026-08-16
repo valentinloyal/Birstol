@@ -28,3 +28,30 @@ export function nomDuPartage(titre, date = new Date()) {
 }
 
 export const nettoyerURL = () => history.replaceState(null, "", location.pathname);
+
+/* ------------------------------------------------------------------ */
+/*  Partage de fichiers                                                */
+/* ------------------------------------------------------------------ */
+
+/* Android envoie les fichiers partagés en POST. Le service worker les dépose
+   dans un cache dédié et redirige vers l'app avec ?partage=recu ; c'est ici
+   qu'on vient relever la boîte. Le cache est effacé après lecture, pour qu'un
+   simple rechargement ne réimporte pas le même partage. */
+const PARTAGE = "bristol-partage";
+const CLE_PARTAGE = "./partage-recu";
+
+export const partageEnBoite = (recherche) =>
+  new URLSearchParams(recherche || "").get("partage") === "recu";
+
+export async function releverPartage() {
+  try {
+    const boite = await caches.open(PARTAGE);
+    const reponse = await boite.match(CLE_PARTAGE);
+    if (!reponse) return [];
+    const recu = await reponse.json();
+    await boite.delete(CLE_PARTAGE);
+    return Array.isArray(recu) ? recu.filter((f) => f && typeof f.texte === "string" && f.texte.trim()) : [];
+  } catch {
+    return [];
+  }
+}

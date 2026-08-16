@@ -3,7 +3,8 @@ import { CSS } from "./styles.js";
 import { loadDecks, saveDecks } from "./storage.js";
 import { uid } from "./outils.js";
 import { fileDuJour, filePaquet, reinitialiser } from "./revision.js";
-import { lirePartage, nomDuPartage, nettoyerURL } from "./partage.js";
+import { cleanName } from "./parse.js";
+import { lirePartage, nomDuPartage, nettoyerURL, partageEnBoite, releverPartage } from "./partage.js";
 import { Home } from "./components/Home.jsx";
 import { DeckView } from "./components/DeckView.jsx";
 import { Study } from "./components/Study.jsx";
@@ -39,6 +40,19 @@ export default function Bristol() {
       if (recu) {
         nettoyerURL();
         setSheet({ type: "import", texte: recu.texte, nom: nomDuPartage(recu.titre) });
+        return;
+      }
+      /* Partage de fichiers : le service worker a déposé le contenu dans un
+         cache, on vient le relever. Même règle que pour le texte : on présente
+         la feuille pré-remplie, on n'importe jamais tout seul. */
+      if (partageEnBoite(location.search)) {
+        nettoyerURL();
+        releverPartage().then((fichiers) => {
+          if (!fichiers.length) { say("Rien d'exploitable dans ce partage."); return; }
+          const premier = fichiers[0];
+          if (fichiers.length > 1) say(`${fichiers.length} fichiers partagés, le premier est présenté.`);
+          setSheet({ type: "import", texte: premier.texte, nom: nomDuPartage(cleanName(premier.nom || "")) });
+        });
       }
     });
   }, []);
