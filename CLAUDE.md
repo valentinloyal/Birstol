@@ -40,7 +40,13 @@ Aucune dépendance runtime : React est bundlé dans `app.js`.
 ```
 index.html              page d'entrée ; capture beforeinstallprompt dans window.__bip
 app.js                  bundle compilé (~176 Ko) — NE JAMAIS ÉDITER À LA MAIN
-src/App.jsx             la source, ~875 lignes, composant unique exporté par défaut
+src/App.jsx             composant racine : état, vues, feuilles (~100 l.)
+src/styles.js           la constante CSS
+src/storage.js          localStorage : loadDecks, saveDecks
+src/outils.js           uid, mkCard, shuffle, counts, BOX_COLOR, flat, relative, fitSize
+src/parse.js            parseText et cleanName — pur, sans DOM, donc testable
+src/components/         Icons, Segments, Install, Home, DeckView, Study,
+                        NewDeckSheet, ImportSheet, MenuSheet
 src/main.jsx            point d'entrée : montage React + enregistrement du SW
 package.json            dépendances de build + script `npm run build`
 sw.js                   cache-first ; constante CACHE = "bristol-vN"
