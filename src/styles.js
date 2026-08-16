@@ -130,6 +130,13 @@ export const CSS = `
   height:42px; border-radius:13px; display:flex; align-items:center; justify-content:center; gap:8px;
   font-size:14px; font-weight:600; color:var(--lavande); background-color:var(--violet2); }
 
+/* --- recherche dans un paquet --- */
+.chercher { display:flex; align-items:center; gap:9px; border-radius:13px; padding:0 12px; margin-bottom:12px;
+  height:44px; color:var(--lavande); background-color:var(--violet2); }
+.chercher input { flex:1; min-width:0; border:none; outline:none; color:var(--clair); background-color:transparent; }
+.chercher input::placeholder { color:#7C6A9C; }
+.chercher button { display:grid; place-items:center; color:var(--sourdine); flex:0 0 auto; }
+
 /* --- listes de fiches --- */
 .row { display:flex; gap:11px; align-items:flex-start; border-radius:13px; padding:13px 15px; margin-bottom:8px;
   text-align:left; width:100%; background-color:var(--violet2); }

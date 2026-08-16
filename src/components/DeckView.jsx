@@ -4,8 +4,18 @@ import { Ico, I } from "./Icons.jsx";
 
 export function DeckView({ deck, startDraft, onBack, onUpdate, onStudy, onSheet }) {
   const [draft, setDraft] = useState(startDraft ? { q: "", a: "" } : null);
+  const [recherche, setRecherche] = useState("");
   const qRef = useRef(null);
   const restants = deck.cards.filter((c) => (c.box || 0) < 2).length;
+
+  /* Recherche sans accent ni casse : on tape « heritage », on trouve
+     « héritage ». Le numéro affiché reste celui de la fiche dans le paquet,
+     pas celui du résultat, pour ne pas perdre ses repères. */
+  const sansAccent = (s) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+  const terme = sansAccent(recherche.trim());
+  const fiches = deck.cards
+    .map((c, i) => ({ c, rang: i }))
+    .filter(({ c }) => !terme || sansAccent(c.q + " " + c.a).includes(terme));
 
   useEffect(() => { if (draft && qRef.current) qRef.current.focus(); }, [draft?.id]);
 
@@ -54,9 +64,30 @@ export function DeckView({ deck, startDraft, onBack, onUpdate, onStudy, onSheet 
           </button>
         )}
 
-        {deck.cards.map((c, i) => (
+        {deck.cards.length > 6 && !draft && (
+          <div className="chercher">
+            <Ico d={I.loupe} size={17} />
+            <input value={recherche} placeholder="Chercher dans les fiches"
+              onChange={(e) => setRecherche(e.target.value)} />
+            {recherche && (
+              <button onClick={() => setRecherche("")} aria-label="Effacer la recherche">
+                <Ico d={I.close} size={16} />
+              </button>
+            )}
+          </div>
+        )}
+
+        {terme && (
+          <p className="note" style={{ margin: "0 0 10px" }}>
+            {fiches.length === 0
+              ? "Aucune fiche ne contient ce mot."
+              : `${fiches.length} fiche${fiches.length > 1 ? "s" : ""} sur ${deck.cards.length}`}
+          </p>
+        )}
+
+        {fiches.map(({ c, rang }) => (
           <button key={c.id} className="row" onClick={() => setDraft({ id: c.id, q: c.q, a: c.a })}>
-            <span className="n">{String(i + 1).padStart(2, "0")}</span>
+            <span className="n">{String(rang + 1).padStart(2, "0")}</span>
             <span className="dot" style={{ backgroundColor: BOX_COLOR[c.box || 0] }} />
             <span style={{ flex: 1, minWidth: 0 }}>
               <span className="q" style={{ display: "block" }}>{c.q}</span>
