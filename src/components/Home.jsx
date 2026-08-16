@@ -3,6 +3,7 @@ import { compterDues, prochaineEcheance, dansCombien } from "../revision.js";
 import { InstallButton } from "./Install.jsx";
 import { Segments } from "./Segments.jsx";
 import { Ico, I } from "./Icons.jsx";
+import { AstucesBloc } from "./AstucesSheet.jsx";
 
 export function Home({ decks, ready, onOpen, onJour, onSheet }) {
   const all = decks.flatMap((d) => d.cards);
@@ -66,6 +67,7 @@ export function Home({ decks, ready, onOpen, onJour, onSheet }) {
             <Segments cards={d.cards} />
           </button>
         ))}
+        <AstucesBloc onOuvrir={() => onSheet({ type: "astuces" })} />
       </div>
 
       <div className="foot">

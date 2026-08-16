@@ -49,11 +49,12 @@ src/sauvegarde.js       format de sauvegarde complète — pur, testable
 src/revision.js         échéances, files du jour, migration — pur, testable
 src/partage.js          réception d'un partage Android — pur, testable
 src/cours.js            markdown : sections, blocs, styles — pur, testable
+src/astuces.js          documentation intégrée et prompts de génération — pur
 src/fichier.js          seul module qui lit et écrit des fichiers (FileReader, Blob)
 src/components/         Icons, Segments, Install, Home, DeckView, Study,
                         NewDeckSheet, ImportSheet, MenuSheet, BackupSheet,
-                        Cours, CoursSheet, SectionSheet
-tests/                  parse, sauvegarde, revision, partage, cours — 108 tests
+                        Cours, CoursSheet, SectionSheet, AstucesSheet
+tests/                  parse, sauvegarde, revision, partage, cours, astuces — 123 tests
 src/main.jsx            point d'entrée : montage React + enregistrement du SW
 package.json            dépendances de build + script `npm run build`
 sw.js                   cache-first ; constante CACHE = "bristol-vN"
@@ -124,6 +125,21 @@ Deux sections de même titre reçoivent un suffixe (`exercices`, `exercices-2`).
 Le rendu est **volontairement partiel** : titres, listes, code, gras, italique,
 citations. Ni tableaux, ni images, ni liens — la règle du projet reste : aucune
 dépendance. Le markdown est transformé en éléments React, **jamais** injecté en HTML.
+
+### Astuces (`astuces.js`)
+
+Seule documentation intégrée à l’app : un bloc sur l’accueil, au-dessus des deux
+boutons du pied, qui ouvre une liste dépliable. Elle contient deux **prompts de
+génération** prêts à copier.
+
+Ces prompts sont **une pièce du parseur autant qu’un texte** : s’ils cessent
+d’exiger l’espace autour du point-virgule, les paquets générés seront coupés au
+mauvais endroit, en silence. `tests/astuces.test.js` monte la garde dessus, et
+va jusqu’à importer l’exemple contenu dans le prompt pour vérifier que prompt et
+parseur ne divergent pas.
+
+La copie passe par le presse-papiers ; en cas de refus (hors HTTPS, fenêtre sans
+focus) le prompt est **sélectionné automatiquement**, pour qu’un appui long suffise.
 
 ### Règles de révision (déjà corrigées une fois, ne pas régresser)
 

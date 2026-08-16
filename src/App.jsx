@@ -16,6 +16,7 @@ import { BackupSheet } from "./components/BackupSheet.jsx";
 import { Cours } from "./components/Cours.jsx";
 import { CoursSheet } from "./components/CoursSheet.jsx";
 import { SectionSheet } from "./components/SectionSheet.jsx";
+import { AstucesSheet } from "./components/AstucesSheet.jsx";
 
 /* ------------------------------------------------------------------ */
 /*  Bristol — fiches de révision                                       */
@@ -169,6 +170,7 @@ export default function Bristol() {
         )}
 
         {sheet?.type === "install" && <InstallSheet onClose={() => setSheet(null)} />}
+        {sheet?.type === "astuces" && <AstucesSheet onClose={() => setSheet(null)} />}
         {sheet?.type === "backup" && (
           <BackupSheet
             decks={decks}

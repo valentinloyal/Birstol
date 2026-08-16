@@ -130,6 +130,28 @@ export const CSS = `
   height:42px; border-radius:13px; display:flex; align-items:center; justify-content:center; gap:8px;
   font-size:14px; font-weight:600; color:var(--lavande); background-color:var(--violet2); }
 
+/* --- astuces --- */
+.astuces-bloc { display:flex; align-items:center; gap:12px; width:100%; text-align:left; border-radius:14px;
+  padding:13px 14px; margin:6px 0 4px; background-color:var(--violet2);
+  box-shadow:inset 0 0 0 1.5px var(--violet3); transition:transform .12s; }
+.astuces-bloc:active { transform:scale(.985); }
+.astuces-bloc .pastille { width:34px; height:34px; border-radius:11px; display:grid; place-items:center; flex:0 0 auto;
+  color:#2A0F4C; background-color:var(--or); }
+.astuces-bloc b { display:block; font-size:15px; letter-spacing:-.01em; }
+.astuces-bloc small { display:block; font-size:12px; color:var(--sourdine); margin-top:1px;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+.astuces > div { border-bottom:1px solid var(--violet2); }
+.astuces > div > button { display:flex; align-items:center; justify-content:space-between; gap:10px;
+  width:100%; text-align:left; padding:14px 2px; font-size:15px; font-weight:600; }
+.astuces > div.ouverte > button { color:var(--or); }
+.astuces > div > button em { font-family:var(--mono); font-style:normal; font-size:17px; color:var(--sourdine); flex:0 0 auto; }
+.astuces .corps { padding:0 2px 14px; }
+.astuces .corps p { margin:0 0 12px; font-size:14px; line-height:1.55; color:var(--sourdine); }
+.astuces .corps pre { margin:0; padding:12px 13px; border-radius:11px; max-height:240px; overflow:auto;
+  font-family:var(--mono); font-size:11.5px; line-height:1.5; color:var(--clair); white-space:pre-wrap;
+  word-break:break-word; background-color:var(--violet2); box-shadow:inset 0 0 0 1.5px var(--violet3); }
+
 /* --- cours --- */
 .sommaire { display:flex; gap:7px; overflow-x:auto; padding:0 18px 12px; flex:0 0 auto; scrollbar-width:none; }
 .sommaire::-webkit-scrollbar { display:none; }
