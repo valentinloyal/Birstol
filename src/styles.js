@@ -42,7 +42,10 @@ export const CSS = `
 /* Le bloc Astuces ferme toujours la liste : la reserve sous lui n a besoin que
    de degager le pied, pas de laisser respirer une fiche coupee. */
 .scroll-accueil { display:flex; flex-direction:column; padding-bottom:104px; }
-.scroll-accueil > * { flex:0 0 auto; }
+/* Le prefixe .bx n'est pas decoratif : sans lui cette regle vaut (0,1,0), a
+   egalite avec « .btn { flex:1 } » ecrite plus bas, qui l'emporterait alors par
+   l'ordre. Le bouton de la file du jour s'etirait sur toute la hauteur. */
+.bx .scroll-accueil > * { flex:0 0 auto; }
 
 /* --- compteurs --- */
 .tally { display:flex; gap:8px; margin:2px 0 20px; }

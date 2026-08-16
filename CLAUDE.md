@@ -299,6 +299,16 @@ utilisé comme connaissance de projet côté Claude.
 - Trois éléments n'ont **volontairement** pas de fond, ce n'est pas une régression :
   `.pill` (contour en `box-shadow`), `.drop` (bordure pointillée) et `.menu button`
   (simple filet de séparation).
+- **La même famille de pièges a frappé deux fois : deux règles à égalité de
+  spécificité, c'est l'ordre d'écriture qui tranche.** Après `.bx button`, ce fut
+  `.scroll-accueil > *` posant `flex:0 0 auto`, à égalité (0,1,0) avec
+  `.btn { flex:1 }` écrite plus bas : le bouton de la file du jour s'étirait sur
+  toute la hauteur de l'accueil. Le correctif est le même — remonter la
+  spécificité, ici en préfixant par `.bx`. **Une règle qui doit neutraliser une
+  classe utilitaire ne doit jamais valoir (0,1,0).**
+- Un enfant de flex ne descend pas sous la largeur de son texte sans
+  **`min-width: 0`**. Sans lui, un `text-overflow: ellipsis` ne tronque rien et
+  pousse tout le bloc hors de l'écran — vu sur le bloc Astuces.
 - **Tous les chemins doivent rester relatifs** (`./app.js`), le site est servi depuis
   un sous-dossier `/Birstol/`.
 - **Toujours incrémenter `CACHE` dans `sw.js`** à chaque déploiement, sinon le
