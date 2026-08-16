@@ -74,6 +74,14 @@ export const CSS = `
   box-shadow:inset 0 0 0 1.5px var(--violet3); display:flex; align-items:center; gap:6px; flex:0 0 auto; transition:transform .12s; }
 .pill:active { transform:scale(.94); }
 
+/* --- file du jour, sur l'accueil --- */
+.jour { width:100%; height:auto; padding:14px 16px; margin:0 0 18px; gap:1px; }
+.jour b { font-size:18px; letter-spacing:-.015em; }
+.jour small { font-family:var(--mono); font-size:10px; letter-spacing:.1em; text-transform:uppercase; opacity:.72; font-weight:400; }
+.rien-du-jour { border-radius:14px; padding:13px 15px; margin-bottom:18px; font-size:13px; color:var(--sourdine);
+  background-color:var(--violet2); }
+.rien-du-jour b { color:var(--vert); }
+
 /* --- ecran vide --- */
 .empty { text-align:center; padding:56px 10px 30px; }
 .empty .mark { font-family:var(--serif); font-size:56px; color:var(--violet3); line-height:1; }

@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { shuffle, fitSize } from "../outils.js";
+import { noter } from "../revision.js";
 import { Ico, I } from "./Icons.jsx";
 
 const GRADES = [
@@ -8,28 +9,33 @@ const GRADES = [
   { key: 2, label: "Acquis", hint: "3", color: "var(--vert)", fg: "#0D3B2E" },
 ];
 
-export function Study({ deck, filter, onUpdate, onQuit }) {
-  const [queue, setQueue] = useState(() => {
-    let src = deck.cards;
-    if (filter === "todo") src = src.filter((c) => (c.box || 0) < 2);
-    return shuffle(src).sort((a, b) => (a.box || 0) - (b.box || 0)).map((c) => c.id);
-  });
+/* Une session porte sur une file de références { paquetId, ficheId } construite
+   en amont par revision.js. Elle peut donc traverser plusieurs paquets, ce qui
+   est tout l'intérêt de la file du jour.
+
+   La file est figée au montage : chaque fiche est vue une seule fois, et noter
+   « À revoir » ne la remet pas en fin de file. Les ratées sont reproposées à
+   l'écran de fin, dans une nouvelle session explicite. Ne pas régresser. */
+export function Study({ decks, fileInitiale, sousTitre, onNoter, onQuit }) {
+  const [queue, setQueue] = useState(fileInitiale);
   const [pos, setPos] = useState(0);
   const [flipped, setFlipped] = useState(false);
   const [tally, setTally] = useState([0, 0, 0]);
   const [missed, setMissed] = useState([]);
 
-  const card = useMemo(() => deck.cards.find((c) => c.id === queue[pos]), [deck.cards, queue, pos]);
+  const ref = queue[pos];
+  const paquet = useMemo(() => decks.find((d) => d.id === ref?.paquetId), [decks, ref]);
+  const card = useMemo(() => paquet?.cards.find((c) => c.id === ref?.ficheId), [paquet, ref]);
   const done = pos >= queue.length;
+
+  // Un paquet supprimé pendant la session laisserait une référence morte.
+  useEffect(() => { if (!done && !card) setPos((p) => p + 1); }, [done, card]);
 
   const grade = (g) => {
     if (!card) return;
-    onUpdate({
-      cards: deck.cards.map((c) => (c.id === card.id ? { ...c, box: g } : c)),
-      lastStudied: Date.now(),
-    });
+    onNoter(ref.paquetId, ref.ficheId, noter(g, card.interval, Date.now()));
     setTally((t) => t.map((n, i) => (i === g ? n + 1 : n)));
-    if (g === 0) setMissed((m) => [...m, card.id]);
+    if (g === 0) setMissed((m) => [...m, ref]);
     setFlipped(false);
     setTimeout(() => setPos((p) => p + 1), 130);
   };
@@ -45,7 +51,13 @@ export function Study({ deck, filter, onUpdate, onQuit }) {
     return () => window.removeEventListener("keydown", k);
   });
 
-  const relancer = (ids) => { setQueue(shuffle(ids)); setPos(0); setTally([0, 0, 0]); setMissed([]); setFlipped(false); };
+  const relancer = (refs) => {
+    setQueue(shuffle(refs));
+    setPos(0);
+    setTally([0, 0, 0]);
+    setMissed([]);
+    setFlipped(false);
+  };
 
   if (done) {
     return (
@@ -54,7 +66,11 @@ export function Study({ deck, filter, onUpdate, onQuit }) {
           <div className="empty">
             <div className="mark" style={{ color: "var(--vert)" }}>✓</div>
             <h2 className="display">Session terminée</h2>
-            <p>{queue.length} fiche{queue.length > 1 ? "s" : ""} vue{queue.length > 1 ? "s" : ""}, chacune une seule fois.</p>
+            <p>
+              {queue.length > 1
+                ? queue.length + " fiches vues, chacune une seule fois."
+                : "1 fiche vue."}
+            </p>
           </div>
           <div className="tally">
             {GRADES.map((g, i) => (
@@ -70,7 +86,7 @@ export function Study({ deck, filter, onUpdate, onQuit }) {
           {missed.length > 0 ? (
             <button className="btn btn-p" onClick={() => relancer(missed)}>Revoir les {missed.length} ratées</button>
           ) : (
-            <button className="btn btn-p" onClick={() => relancer(deck.cards.map((c) => c.id))}>Recommencer</button>
+            <button className="btn btn-p" onClick={() => relancer(fileInitiale)}>Recommencer</button>
           )}
         </div>
       </div>
@@ -83,8 +99,13 @@ export function Study({ deck, filter, onUpdate, onQuit }) {
       <div className="progress"><i style={{ width: `${(pos / queue.length) * 100}%` }} /></div>
       <div className="topbar" style={{ paddingBottom: 2 }}>
         <button className="iconbtn" onClick={onQuit} aria-label="Quitter la révision"><Ico d={I.close} /></button>
-        <div style={{ flex: 1, textAlign: "center" }}>
+        <div style={{ flex: 1, textAlign: "center", minWidth: 0 }}>
           <div className="sub" style={{ fontSize: 12, marginBottom: 0 }}>{pos + 1} / {queue.length}</div>
+          {sousTitre && (
+            <div className="sub" style={{ fontSize: 10, marginBottom: 0, color: "var(--sourdine)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              {sousTitre === "jour" ? paquet?.name : sousTitre}
+            </div>
+          )}
         </div>
         <div style={{ width: 42 }} />
       </div>

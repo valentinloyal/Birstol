@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { CSS } from "./styles.js";
 import { loadDecks, saveDecks } from "./storage.js";
 import { uid } from "./outils.js";
+import { fileDuJour, filePaquet } from "./revision.js";
 import { Home } from "./components/Home.jsx";
 import { DeckView } from "./components/DeckView.jsx";
 import { Study } from "./components/Study.jsx";
@@ -50,12 +51,37 @@ export default function Bristol() {
   const updateDeck = (id, patch) => commit(decks.map((d) => (d.id === id ? { ...d, ...patch } : d)));
   const removeDeck = (id) => { commit(decks.filter((d) => d.id !== id)); setView({ name: "home" }); setSheet(null); };
 
+  /* Une note s'applique à une fiche précise d'un paquet précis : la session
+     peut traverser plusieurs paquets, on ne peut plus se contenter du courant. */
+  const noterFiche = (paquetId, ficheId, maj) =>
+    commit(decks.map((d) => (d.id !== paquetId ? d : {
+      ...d,
+      lastStudied: Date.now(),
+      cards: d.cards.map((c) => (c.id === ficheId ? { ...c, ...maj } : c)),
+    })));
+
+  // La file est construite une fois, au moment d'ouvrir la révision : elle est
+  // ensuite figée par Study, ce qui garantit une fiche vue une seule fois.
+  const ouvrirRevision = (source) =>
+    setView({
+      name: "study",
+      file: source.jour ? fileDuJour(decks, Date.now()) : filePaquet(source.paquet, source.filtre, Date.now()),
+      sousTitre: source.jour ? "jour" : source.paquet.name,
+      retour: source.jour ? { name: "home" } : { name: "deck", id: source.paquet.id },
+    });
+
   return (
     <div className="bx">
       <style>{CSS}</style>
       <div className="bx-shell">
         {view.name === "home" && (
-          <Home decks={decks} ready={ready} onOpen={(id) => setView({ name: "deck", id })} onSheet={setSheet} />
+          <Home
+            decks={decks}
+            ready={ready}
+            onOpen={(id) => setView({ name: "deck", id })}
+            onJour={() => ouvrirRevision({ jour: true })}
+            onSheet={setSheet}
+          />
         )}
         {view.name === "deck" && deck && (
           <DeckView
@@ -64,16 +90,17 @@ export default function Bristol() {
             startDraft={!!view.draft}
             onBack={() => setView({ name: "home" })}
             onUpdate={(p) => updateDeck(deck.id, p)}
-            onStudy={(filter) => setView({ name: "study", id: deck.id, filter })}
+            onStudy={(filtre) => ouvrirRevision({ paquet: deck, filtre })}
             onSheet={setSheet}
           />
         )}
-        {view.name === "study" && deck && (
+        {view.name === "study" && (
           <Study
-            deck={deck}
-            filter={view.filter}
-            onUpdate={(p) => updateDeck(deck.id, p)}
-            onQuit={() => setView({ name: "deck", id: deck.id })}
+            decks={decks}
+            fileInitiale={view.file}
+            sousTitre={view.sousTitre}
+            onNoter={noterFiche}
+            onQuit={() => setView(view.retour)}
           />
         )}
 

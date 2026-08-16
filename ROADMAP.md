@@ -25,13 +25,14 @@ Rien de visible pour l'utilisateur, tout de visible pour la suite.
 5. ~~**Sauvegarde manuelle de la base**~~ — bouton ⋮ sur l'accueil, export complet
    daté et restauration avec confirmation.
 
-## Étape 1 — La révision devient sérieuse (1 à 2 jours)
+## Étape 1 — La révision devient sérieuse
 
-6. **Dates de révision** — ajouter `due` et `interval` à chaque fiche. Leitner avec
-   intervalles 1 / 3 / 7 / 21 jours, ou SM-2 allégé. Le champ `box` reste, on ajoute.
-   Prévoir la migration des paquets existants (`box` connu, `due` absent → dû aujourd'hui).
-7. **File du jour sur l'accueil** — « 18 fiches à réviser aujourd'hui », toutes
-   paquets confondus, en un seul bouton. C'est ce qui transforme l'app en habitude.
+6. ~~**Dates de révision**~~ — **fait le 18 août 2026.** `due` et `interval` sur chaque
+   fiche, échelle 1 / 3 / 7 / 21 jours, `box` conservé. Migration automatique des
+   paquets existants au chargement.
+7. ~~**File du jour sur l'accueil**~~ — **fait le 18 août 2026.** Un bouton unique
+   « N fiches à réviser aujourd'hui », tous paquets confondus. Quand il n'y a rien :
+   « À jour. Prochaine fiche demain. »
 8. **Notification quotidienne** — `Notification` + `showTrigger` si disponible, sinon
    un simple rappel à l'ouverture. Rester sobre : une par jour, désactivable.
 

@@ -1,11 +1,16 @@
 import { counts, relative } from "../outils.js";
+import { compterDues, prochaineEcheance, dansCombien } from "../revision.js";
 import { InstallButton } from "./Install.jsx";
 import { Segments } from "./Segments.jsx";
 import { Ico, I } from "./Icons.jsx";
 
-export function Home({ decks, ready, onOpen, onSheet }) {
+export function Home({ decks, ready, onOpen, onJour, onSheet }) {
   const all = decks.flatMap((d) => d.cards);
   const [aRevoir, , acquis] = counts(all);
+
+  const maintenant = Date.now();
+  const dues = compterDues(decks, maintenant);
+  const suivante = prochaineEcheance(decks, maintenant);
 
   return (
     <>
@@ -26,6 +31,20 @@ export function Home({ decks, ready, onOpen, onSheet }) {
             <div><b>{decks.length}</b><span>Paquets</span></div>
             <div><b style={{ color: "var(--rouge)" }}>{aRevoir}</b><span>À revoir</span></div>
             <div><b style={{ color: "var(--vert)" }}>{all.length ? Math.round((acquis / all.length) * 100) : 0}%</b><span>Acquis</span></div>
+          </div>
+        )}
+
+        {/* Le geste du jour, tous paquets confondus : c'est ce qui doit
+            transformer l'app en habitude, donc c'est le seul bouton mis en avant. */}
+        {dues > 0 && (
+          <button className="btn btn-p jour" onClick={onJour}>
+            <b>{dues} fiche{dues > 1 ? "s" : ""} à réviser</b>
+            <small>aujourd'hui, tous paquets confondus</small>
+          </button>
+        )}
+        {decks.length > 0 && dues === 0 && (
+          <div className="rien-du-jour">
+            <b>À jour.</b> {suivante ? "Prochaine fiche " + dansCombien(suivante, maintenant) + "." : ""}
           </div>
         )}
 

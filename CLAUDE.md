@@ -46,10 +46,11 @@ src/storage.js          localStorage : loadDecks, saveDecks
 src/outils.js           uid, mkCard, shuffle, counts, BOX_COLOR, relative, fitSize
 src/parse.js            parseText et cleanName — pur, sans DOM, donc testable
 src/sauvegarde.js       format de sauvegarde complète — pur, testable
+src/revision.js         échéances, files du jour, migration — pur, testable
 src/fichier.js          seul module qui lit et écrit des fichiers (FileReader, Blob)
 src/components/         Icons, Segments, Install, Home, DeckView, Study,
                         NewDeckSheet, ImportSheet, MenuSheet, BackupSheet
-tests/                  parse.test.js, sauvegarde.test.js — npm test
+tests/                  parse, sauvegarde, revision — npm test, 72 tests
 src/main.jsx            point d'entrée : montage React + enregistrement du SW
 package.json            dépendances de build + script `npm run build`
 sw.js                   cache-first ; constante CACHE = "bristol-vN"
@@ -75,7 +76,12 @@ reconstruction donne le même bundle d'une machine à l'autre.
   created: 1755300000000,
   lastStudied: 1755330000000,   // absent tant que jamais révisé
   cards: [
-    { id: "e5f6g7h8", q: "…", a: "…", box: 0 }   // box ∈ {0,1,2}
+    {
+      id: "e5f6g7h8", q: "…", a: "…",
+      box: 0,                  // niveau Leitner, porte aussi la couleur
+      interval: 1,             // délai en jours qui vient d'être appliqué
+      due: 1755302400000       // minuit du jour où la fiche redevient à réviser
+    }
   ]
 }
 ```
@@ -102,6 +108,28 @@ pour l'instant — voir la feuille de route.
   compteur (24 fiches affichaient « 77 fiches passées en revue »).
 - Les ratées sont proposées à l'écran de fin, dans une **nouvelle session explicite**.
 - Ordre : mélange aléatoire puis tri stable par `box` croissant (le plus faible d'abord).
+- Une session porte sur une file de références `{ paquetId, ficheId }` construite
+  par `revision.js`. Elle peut donc traverser plusieurs paquets : c'est ce qui permet
+  la file du jour. `Study` ne connaît plus un paquet, mais une file.
+
+### Échéances (`revision.js`)
+
+Échelle **1 / 3 / 7 / 21 jours** sur trois boîtes : « Acquis » monte d'un cran quand
+il est répété, 7 jours la première fois, 21 ensuite. Une rechute ramène à 1 jour,
+même depuis 21.
+
+| Note | `box` | Délai |
+|---|---|---|
+| À revoir | 0 | 1 jour |
+| Presque | 1 | 3 jours |
+| Acquis | 2 | 7 jours, puis 21 si l'intervalle précédent valait déjà 7 |
+
+Les échéances tombent **à minuit**, jamais à l'heure de la révision : une fiche notée
+à 22 h avec un jour de délai revient le lendemain matin, pas le lendemain soir.
+
+La migration des paquets d'avant se fait dans `loadDecks`, seule porte d'entrée des
+données : `box` connu et `due` absent → dû aujourd'hui, intervalle déduit de la boîte.
+Elle réécrit aussitôt, pour ne pas être refaite à chaque ouverture.
 
 ### Parseur d'import (`parseText`)
 
