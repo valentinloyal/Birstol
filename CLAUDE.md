@@ -40,7 +40,9 @@ Aucune dépendance runtime : React est bundlé dans `app.js`.
 ```
 index.html              page d'entrée ; capture beforeinstallprompt dans window.__bip
 app.js                  bundle compilé (~176 Ko) — NE JAMAIS ÉDITER À LA MAIN
-source-App.jsx          la source, ~875 lignes, composant unique exporté par défaut
+src/App.jsx             la source, ~875 lignes, composant unique exporté par défaut
+src/main.jsx            point d'entrée : montage React + enregistrement du SW
+package.json            dépendances de build + script `npm run build`
 sw.js                   cache-first ; constante CACHE = "bristol-vN"
 manifest.webmanifest    PWA : nom, icônes, standalone, thème #2A0F4C
 icon-{192,512}.png      icônes générées (Pillow)
@@ -48,10 +50,11 @@ icon-maskable-512.png   variante à marge large pour Android
 publier.bat             crée le dépôt GitHub + active Pages (première fois)
 maj.bat                 git add / commit / push (usage courant)
 .nojekyll               désactive Jekyll sur Pages
+.gitignore              ignore node_modules/
 ```
 
-Le fichier `main.jsx` (montage React + enregistrement du SW) vit hors du dépôt,
-dans l'environnement de build. Voir « Reconstruire » ci-dessous.
+`node_modules/` n'est pas versionné ; `package-lock.json` l'est, pour que la
+reconstruction donne le même bundle d'une machine à l'autre.
 
 ### Modèle de données
 
@@ -127,31 +130,21 @@ utilisé comme connaissance de projet côté Claude.
 
 ## 4. Reconstruire et déployer
 
-Le build vit hors du dépôt. Pour le reconstituer :
+Le build est dans le dépôt depuis le 16 août 2026. Une seule fois, après un clone :
 
 ```bash
-npm i esbuild react@18 react-dom@18
+npm install
 ```
 
-`src/main.jsx` :
-
-```jsx
-import React from "react";
-import { createRoot } from "react-dom/client";
-import Bristol from "./App.jsx";
-createRoot(document.getElementById("root")).render(<Bristol />);
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js").catch(() => {}));
-}
-```
-
-Compilation :
+Puis, à chaque modification du source :
 
 ```bash
-npx esbuild src/main.jsx --bundle --minify --format=iife \
-  --loader:.jsx=jsx --jsx=automatic \
-  --define:process.env.NODE_ENV='"production"' --outfile=app.js
+npm run build
 ```
+
+Le script est figé dans `package.json` : il compile `src/main.jsx` vers `app.js`
+(bundle IIFE minifié, React 18.3.1 épinglé, mode production). Ne pas le relancer à la
+main avec une autre ligne de commande, c'est ce qui garantit un bundle reproductible.
 
 Puis : incrémenter `CACHE` dans `sw.js`, `git add -A && git commit && git push`
 (ou double-clic sur `maj.bat` sous Windows). GitHub Pages reconstruit en 1 à 2 minutes.

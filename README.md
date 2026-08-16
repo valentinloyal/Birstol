@@ -56,13 +56,15 @@ Blocs séparés par une ligne vide (1re ligne = question), ou JSON :
 | `app.js` | application compilée (React, bundle minifié) |
 | `sw.js` | cache hors-ligne |
 | `manifest.webmanifest` | installation PWA |
-| `source-App.jsx` | code source lisible, pour modifier |
+| `src/App.jsx` | code source lisible, pour modifier |
+| `src/main.jsx` | point d'entrée React |
+| `package.json` | dépendances et script de compilation |
 | `.nojekyll` | désactive Jekyll sur Pages |
 
-Après modification du source, recompiler :
+Après modification du source, recompiler (une seule fois d'abord : `npm install`) :
 
 ```bat
-npx esbuild source-App.jsx --bundle --minify --format=iife --jsx=automatic --outfile=app.js
+npm run build
 ```
 
 (en pensant à bumper `CACHE` dans `sw.js` pour forcer la mise à jour côté téléphone).
