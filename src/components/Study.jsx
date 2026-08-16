@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { shuffle, fitSize } from "../outils.js";
 import { noter } from "../revision.js";
 import { Ico, I } from "./Icons.jsx";
@@ -30,6 +30,14 @@ export function Study({ decks, fileInitiale, sousTitre, onNoter, onCorriger, onQ
      même où l'on révise. On corrige sur place plutôt que de quitter, chercher
      la fiche dans la liste, corriger, et relancer une session. */
   const [correction, setCorrection] = useState(null);
+  /* Balayage : la fiche suit le doigt, sinon rien ne dit que le geste est pris.
+     `glisse` est le décalage en cours, null quand aucun doigt n'est posé. */
+  const [glisse, setGlisse] = useState(null);
+  const depart = useRef(null);
+  /* Un balayage abouti peut être suivi d'un clic synthétisé par le navigateur.
+     On retient l'instant de fin du geste plutôt qu'un drapeau : selon les cas le
+     clic ne vient jamais, et un drapeau resté armé avalerait le clic suivant. */
+  const finDuGeste = useRef(0);
 
   const ref = queue[pos];
   const paquet = useMemo(() => decks.find((d) => d.id === ref?.paquetId), [decks, ref]);
@@ -74,6 +82,39 @@ export function Study({ decks, fileInitiale, sousTitre, onNoter, onCorriger, onQ
     window.addEventListener("keydown", k);
     return () => window.removeEventListener("keydown", k);
   });
+
+  /* Seuil de déclenchement du balayage, en pixels. En deçà, la fiche revient
+     en place et le geste est traité comme une simple pression. */
+  const SEUIL = 70;
+
+  /* On n'arme le geste que réponse visible : balayer une question qu'on n'a pas
+     retournée ne veut rien dire. Sur une fiche face question, le doigt retombe
+     donc sur le clic, qui la retourne comme avant. */
+  const debutGeste = (e) => {
+    if (correction || !flipped) return;
+    depart.current = { x: e.touches[0].clientX, y: e.touches[0].clientY, dx: 0, bouge: false };
+    setGlisse(0);
+  };
+  const pendantGeste = (e) => {
+    if (!depart.current) return;
+    const dx = e.touches[0].clientX - depart.current.x;
+    const dy = e.touches[0].clientY - depart.current.y;
+    // Un geste vertical, c'est un défilement de la réponse : on ne le vole pas.
+    if (!depart.current.bouge && Math.abs(dy) > Math.abs(dx)) { depart.current = null; setGlisse(null); return; }
+    if (Math.abs(dx) > 6) depart.current.bouge = true;
+    depart.current.dx = dx;
+    setGlisse(dx);
+  };
+  const finGeste = () => {
+    if (!depart.current) return;
+    const { dx, bouge } = depart.current;
+    depart.current = null;
+    setGlisse(null);
+    if (!bouge) return;              // pression simple : c'est le clic qui retourne
+    finDuGeste.current = Date.now();  // et on neutralise le clic synthétisé qui suit
+    if (dx >= SEUIL) grade(2);
+    else if (dx <= -SEUIL) grade(0);
+  };
 
   const relancer = (refs) => {
     setQueue(shuffle(refs));
@@ -180,7 +221,19 @@ export function Study({ decks, fileInitiale, sousTitre, onNoter, onCorriger, onQ
         <div className="stack">
           {rest > 2 && <div className="ghost" style={{ transform: "translateY(14px) scale(.94)" }} />}
           {rest > 1 && <div className="ghost" style={{ transform: "translateY(7px) scale(.97)", opacity: .3 }} />}
-          <div className={"flip" + (flipped ? " on" : "")} onClick={() => setFlipped((f) => !f)}
+          {/* Deux repères sous la fiche, révélés par le balayage. */}
+          {glisse !== null && (
+            <>
+              <div className="marque gauche" style={{ opacity: Math.min(1, Math.max(0, -glisse) / SEUIL) }}>À revoir</div>
+              <div className="marque droite" style={{ opacity: Math.min(1, Math.max(0, glisse) / SEUIL) }}>Acquis</div>
+            </>
+          )}
+          <div className={"flip" + (flipped ? " on" : "")}
+            onClick={() => { if (Date.now() - finDuGeste.current < 500) return; setFlipped((f) => !f); }}
+            onTouchStart={debutGeste} onTouchMove={pendantGeste} onTouchEnd={finGeste} onTouchCancel={finGeste}
+            style={glisse !== null
+              ? { transform: `translateX(${glisse}px) rotateY(180deg) rotate(${glisse / 28}deg)`, transition: "none" }
+              : undefined}
             role="button" tabIndex={0} aria-label="Retourner la fiche">
             <div className="face">
               <div className="rule" /><div className="marge" />

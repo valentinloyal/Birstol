@@ -120,6 +120,12 @@ export const CSS = `
 .grade button:active { transform:scale(.95); }
 .grade small { font-family:var(--mono); font-size:10px; opacity:.7; font-weight:400; }
 
+/* Reperes du balayage, revelees sous la fiche pendant le geste. */
+.marque { position:absolute; top:50%; transform:translateY(-50%); z-index:0; font-weight:900; font-style:italic;
+  text-transform:uppercase; font-size:15px; letter-spacing:-.01em; padding:9px 14px; border-radius:11px; }
+.marque.gauche { left:-6px; color:#FFF; background-color:var(--rouge); }
+.marque.droite { right:-6px; color:#0D3B2E; background-color:var(--vert); }
+
 .revenir { position:absolute; left:18px; right:18px; bottom:calc(96px + env(safe-area-inset-bottom));
   height:42px; border-radius:13px; display:flex; align-items:center; justify-content:center; gap:8px;
   font-size:14px; font-weight:600; color:var(--lavande); background-color:var(--violet2); }
