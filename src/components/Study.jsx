@@ -22,6 +22,10 @@ export function Study({ decks, fileInitiale, sousTitre, onNoter, onQuit }) {
   const [flipped, setFlipped] = useState(false);
   const [tally, setTally] = useState([0, 0, 0]);
   const [missed, setMissed] = useState([]);
+  /* Pile des notes posées, pour pouvoir revenir en arrière. Un mauvais appui
+     sur les trois boutons ne coûte plus une couleur mais jusqu'à 21 jours
+     d'absence : il faut pouvoir le reprendre. */
+  const [histoire, setHistoire] = useState([]);
 
   const ref = queue[pos];
   const paquet = useMemo(() => decks.find((d) => d.id === ref?.paquetId), [decks, ref]);
@@ -33,11 +37,26 @@ export function Study({ decks, fileInitiale, sousTitre, onNoter, onQuit }) {
 
   const grade = (g) => {
     if (!card) return;
+    const avant = { box: card.box, interval: card.interval, due: card.due };
     onNoter(ref.paquetId, ref.ficheId, noter(g, card.interval, Date.now()));
+    setHistoire((h) => [...h, { ref, avant, note: g }]);
     setTally((t) => t.map((n, i) => (i === g ? n + 1 : n)));
     if (g === 0) setMissed((m) => [...m, ref]);
     setFlipped(false);
     setTimeout(() => setPos((p) => p + 1), 130);
+  };
+
+  /* Revient sur la dernière note : l'échéance de la fiche est remise telle
+     qu'elle était, et la session recule d'une position. */
+  const annuler = () => {
+    if (!histoire.length) return;
+    const dernier = histoire[histoire.length - 1];
+    onNoter(dernier.ref.paquetId, dernier.ref.ficheId, dernier.avant);
+    setHistoire((h) => h.slice(0, -1));
+    setTally((t) => t.map((n, i) => (i === dernier.note ? Math.max(0, n - 1) : n)));
+    if (dernier.note === 0) setMissed((m) => m.filter((r) => r !== dernier.ref));
+    setPos((p) => Math.max(0, p - 1));
+    setFlipped(false);
   };
 
   useEffect(() => {
@@ -45,6 +64,7 @@ export function Study({ decks, fileInitiale, sousTitre, onNoter, onQuit }) {
       if (done) return;
       if (e.key === " " || e.key === "Enter") { e.preventDefault(); setFlipped((f) => !f); }
       else if (flipped && ["1", "2", "3"].includes(e.key)) grade(Number(e.key) - 1);
+      else if (e.key === "Backspace") { e.preventDefault(); annuler(); }
       else if (e.key === "Escape") onQuit();
     };
     window.addEventListener("keydown", k);
@@ -56,6 +76,7 @@ export function Study({ decks, fileInitiale, sousTitre, onNoter, onQuit }) {
     setPos(0);
     setTally([0, 0, 0]);
     setMissed([]);
+    setHistoire([]);
     setFlipped(false);
   };
 
@@ -81,6 +102,11 @@ export function Study({ decks, fileInitiale, sousTitre, onNoter, onQuit }) {
             ))}
           </div>
         </div>
+        {histoire.length > 0 && (
+          <button className="revenir" onClick={annuler}>
+            <Ico d={I.annuler} size={15} /> Annuler la dernière note
+          </button>
+        )}
         <div className="foot">
           <button className="btn btn-s" onClick={onQuit}>Terminer</button>
           {missed.length > 0 ? (
@@ -107,7 +133,13 @@ export function Study({ decks, fileInitiale, sousTitre, onNoter, onQuit }) {
             </div>
           )}
         </div>
-        <div style={{ width: 42 }} />
+        {histoire.length > 0 ? (
+          <button className="iconbtn" onClick={annuler} aria-label="Annuler la dernière note">
+            <Ico d={I.annuler} />
+          </button>
+        ) : (
+          <div style={{ width: 42 }} />
+        )}
       </div>
 
       <div className="stage">

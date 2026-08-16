@@ -120,6 +120,10 @@ export const CSS = `
 .grade button:active { transform:scale(.95); }
 .grade small { font-family:var(--mono); font-size:10px; opacity:.7; font-weight:400; }
 
+.revenir { position:absolute; left:18px; right:18px; bottom:calc(96px + env(safe-area-inset-bottom));
+  height:42px; border-radius:13px; display:flex; align-items:center; justify-content:center; gap:8px;
+  font-size:14px; font-weight:600; color:var(--lavande); background-color:var(--violet2); }
+
 /* --- listes de fiches --- */
 .row { display:flex; gap:11px; align-items:flex-start; border-radius:13px; padding:13px 15px; margin-bottom:8px;
   text-align:left; width:100%; background-color:var(--violet2); }
