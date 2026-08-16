@@ -2,9 +2,11 @@
   "name": "bristol",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
   "description": "Bristol — fiches de révision, PWA hors-ligne sans serveur ni compte.",
   "scripts": {
-    "build": "esbuild src/main.jsx --bundle --minify --format=iife --loader:.jsx=jsx --jsx=automatic --define:process.env.NODE_ENV=\\\"production\\\" --outfile=app.js"
+    "build": "esbuild src/main.jsx --bundle --minify --format=iife --loader:.jsx=jsx --jsx=automatic --define:process.env.NODE_ENV=\\\"production\\\" --outfile=app.js",
+    "test": "node --test"
   },
   "dependencies": {
     "react": "18.3.1",
