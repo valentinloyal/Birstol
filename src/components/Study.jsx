@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { shuffle, flat, fitSize } from "../outils.js";
+import { shuffle, fitSize } from "../outils.js";
 import { Ico, I } from "./Icons.jsx";
 
 const GRADES = [
@@ -112,7 +112,7 @@ export function Study({ deck, filter, onUpdate, onQuit }) {
       {flipped ? (
         <div className="grade">
           {GRADES.map((g) => (
-            <button key={g.key} style={{ backgroundImage: flat(g.color), color: g.fg }} onClick={() => grade(g.key)}>
+            <button key={g.key} style={{ backgroundColor: g.color, color: g.fg }} onClick={() => grade(g.key)}>
               {g.label}<small>touche {g.hint}</small>
             </button>
           ))}

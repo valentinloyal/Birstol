@@ -11,7 +11,6 @@ export const counts = (cards) => {
   return c;
 };
 export const BOX_COLOR = ["var(--rouge)", "var(--or)", "var(--vert)"];
-export const flat = (c) => `linear-gradient(${c},${c})`;
 
 /* Date de dernière révision, en français et en relatif. */
 export function relative(t) {

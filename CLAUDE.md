@@ -119,15 +119,20 @@ utilisé comme connaissance de projet côté Claude.
 
 ## 3. Pièges connus — lire avant de toucher au CSS
 
-- **Ne jamais écrire `background: none` (ni le raccourci `background`) dans
-  `.bx button`.** La règle a une spécificité (0,1,1) qui bat toutes les classes
-  utilitaires (0,1,0), et le raccourci efface aussi `background-image`. Résultat vécu :
-  Réviser, Importer, les pastilles d'icônes et les lignes de liste sont restés
-  invisibles pendant plusieurs jours. Le reset autorisé est `background-color: transparent`.
-- Les fonds sont actuellement écrits en `background-image: linear-gradient(c, c)`.
-  C'était une parade à un diagnostic erroné (mode sombre forcé de Chrome) ; ce n'est
-  **plus nécessaire** depuis la correction ci-dessus, et on peut revenir à
-  `background-color` pour la lisibilité. Ne pas le faire à moitié.
+- **Le reset des boutons s'écrit `:where(.bx button)`, et le `:where()` n'est pas
+  décoratif.** Sans lui, le sélecteur vaut (0,1,1) et bat toutes les classes de fond,
+  qui valent (0,1,0) : Réviser, Importer, les pastilles d'icônes et les lignes de
+  liste redeviennent invisibles — c'est le bogue qui a coûté plusieurs jours.
+  `:where()` ramène la spécificité à zéro, donc n'importe quelle classe l'emporte.
+  Ne jamais y écrire le raccourci `background`, qui effacerait aussi `background-image`.
+- Les fonds sont écrits en `background-color` depuis le 16 août 2026. Les
+  `background-image: linear-gradient(c, c)` d'avant étaient une parade à un
+  diagnostic erroné (mode sombre forcé de Chrome) ; ils ont tous été convertis.
+  Les deux seuls `linear-gradient` restants sont de vrais dégradés : le fondu du
+  pied de page et les lignes réglées de la fiche.
+- Trois éléments n'ont **volontairement** pas de fond, ce n'est pas une régression :
+  `.pill` (contour en `box-shadow`), `.drop` (bordure pointillée) et `.menu button`
+  (simple filet de séparation).
 - **Tous les chemins doivent rester relatifs** (`./app.js`), le site est servi depuis
   un sous-dossier `/Birstol/`.
 - **Toujours incrémenter `CACHE` dans `sw.js`** à chaque déploiement, sinon le

@@ -1,4 +1,4 @@
-import { counts, BOX_COLOR, flat } from "../outils.js";
+import { counts, BOX_COLOR } from "../outils.js";
 
 /* Barre de progression d'un paquet : rouge / orange / vert, proportionnelle. */
 export function Segments({ cards }) {
@@ -7,7 +7,7 @@ export function Segments({ cards }) {
   return (
     <div className="seg">
       {[a, b, c].map((n, i) => (
-        <i key={i} style={{ width: `${(n / t) * 100}%`, backgroundImage: flat(BOX_COLOR[i]) }} />
+        <i key={i} style={{ width: `${(n / t) * 100}%`, backgroundColor: BOX_COLOR[i] }} />
       ))}
     </div>
   );

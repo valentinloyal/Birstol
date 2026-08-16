@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { mkCard, flat, BOX_COLOR } from "../outils.js";
+import { mkCard, BOX_COLOR } from "../outils.js";
 import { Ico, I } from "./Icons.jsx";
 
 export function DeckView({ deck, startDraft, onBack, onUpdate, onStudy, onSheet }) {
@@ -32,7 +32,7 @@ export function DeckView({ deck, startDraft, onBack, onUpdate, onStudy, onSheet 
 
       <div className="scroll">
         {draft ? (
-          <div style={{ borderRadius: 16, padding: 15, marginBottom: 16, backgroundImage: flat("var(--violet2)") }}>
+          <div style={{ borderRadius: 16, padding: 15, marginBottom: 16, backgroundColor: "var(--violet2)" }}>
             <div className="label" style={{ marginTop: 0 }}>Question</div>
             <textarea ref={qRef} className="field" rows={2} value={draft.q} placeholder="Recto de la fiche"
               onChange={(e) => setDraft({ ...draft, q: e.target.value })} />
@@ -57,7 +57,7 @@ export function DeckView({ deck, startDraft, onBack, onUpdate, onStudy, onSheet 
         {deck.cards.map((c, i) => (
           <button key={c.id} className="row" onClick={() => setDraft({ id: c.id, q: c.q, a: c.a })}>
             <span className="n">{String(i + 1).padStart(2, "0")}</span>
-            <span className="dot" style={{ backgroundImage: flat(BOX_COLOR[c.box || 0]) }} />
+            <span className="dot" style={{ backgroundColor: BOX_COLOR[c.box || 0] }} />
             <span style={{ flex: 1, minWidth: 0 }}>
               <span className="q" style={{ display: "block" }}>{c.q}</span>
               <span className="a" style={{ display: "block" }}>{c.a}</span>
