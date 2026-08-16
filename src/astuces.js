@@ -10,40 +10,42 @@ Sujet : [SUJET]
 Niveau : [NIVEAU]
 Volume : [NOMBRE] fiches.
 
-Rends DEUX blocs séparés, dans cet ordre.
+Rends UN SEUL fichier markdown, nommé sujet-en-minuscules.md, contenant le cours
+ET ses fiches. Bristol importe les deux d'un coup, déjà reliés.
 
-=== BLOC 1 - LE COURS (fichier .md) ===
-Markdown, règles strictes :
+STRUCTURE
 - « # » pour le titre général, « ## » pour chaque section. Ces titres découpent
   le cours dans l'app : garde-les COURTS (2 à 4 mots) et DISTINCTS.
 - « ### » pour les sous-parties, elles restent dans la section.
 - Vise 4 à 7 sections.
-- Rendu par l'app : paragraphes, listes « - » ou « 1. », blocs de code entre
-  \`\`\` avec le langage, **gras**, *italique*, \`code en ligne\`, citations « > ».
+- Après le texte de CHAQUE section « ## », place ses fiches dans un bloc de code
+  marqué \`fiches\` :
+
+## Le bytecode
+
+Le fichier .class contient du bytecode, jamais du code machine.
+
+\`\`\`fiches
+Que produit javac ? ; Du bytecode dans un .class, jamais du code machine
+Que fait int x = 5; ? ; Elle déclare un entier x valant 5
+\`\`\`
+
+LE COURS
+- Rendu par l'app : paragraphes, listes « - » ou « 1. », blocs de code avec le
+  langage indiqué, **gras**, *italique*, \`code en ligne\`, citations « > ».
 - NON rendu, à proscrire : tableaux, images, liens, HTML, LaTeX.
 - Un vrai cours explicatif : chaque section répond à « pourquoi c'est comme ça »,
   pas seulement « c'est quoi ».
 
-=== BLOC 2 - LES FICHES (fichier .csv) ===
-Une fiche par ligne, au format exact :
-question ; réponse
-
-Règles impératives, l'import échoue sinon :
+LES FICHES, règles impératives, l'import échoue sinon
+- Format exact : question ; réponse
 - Le point-virgule est ENTOURÉ D'UNE ESPACE de chaque côté. C'est ce qui permet
   à une question contenant du code (« Que fait int x = 5; ? ») de ne pas être
   coupée sur le ; du code.
 - Une fiche = UNE seule ligne. Jamais de retour à la ligne dans une question ni
   dans une réponse.
-- AUCUNE ligne d'en-tête.
-- Ni « :: », ni « | », ni tabulation comme séparateur.
-- Les lignes commençant par « # » sont ignorées à l'import : sers-t'en pour
-  regrouper les fiches par section, en reprenant MOT POUR MOT le titre « ## »
-  du cours. Exemple :
-
-  # Section : Le bytecode
-  Que produit javac ? ; Du bytecode dans un .class, jamais du code machine
-
-- Ne pose aucune question dont la réponse n'est pas dans le cours.
+- AUCUNE ligne d'en-tête. Ni « :: », ni « | », ni tabulation.
+- Ne pose aucune question dont la réponse n'est pas dans la section juste au-dessus.
 - Une seule idée par fiche. Réponses autonomes, une à deux lignes.
 - Pas de doublons, même reformulés : jamais deux fiches de même réponse.`;
 
@@ -66,7 +68,8 @@ export const ASTUCES = [
     titre: "Faire écrire un paquet par une IA",
     texte:
       "Copiez ce prompt, remplacez le sujet et le volume, et donnez-le à votre assistant. " +
-      "Il rend un cours en markdown et un fichier de fiches, tous deux prêts à importer. " +
+      "Il rend UN SEUL fichier markdown contenant le cours et ses fiches, que vous importez " +
+      "d'un coup par Importer : les fiches arrivent déjà rattachées à leur section. " +
       "Le nom du fichier devient le nom du paquet.",
     prompt: PROMPT_PAQUET,
   },

@@ -74,13 +74,19 @@ export default function Bristol() {
 
     if (cible) {
       // Fusion : les fiches arrivent neuves, en fin de paquet, dues aujourd'hui.
-      commit(decks.map((d) => (d.id === cible.id ? { ...d, cards: [...d.cards, ...fiches] } : d)));
+      // Un cours apporté par le fichier ne remplace pas celui qui est déjà là.
+      const coursApporte = (list.find((d) => d.cours) || {}).cours;
+      commit(decks.map((d) => (d.id !== cible.id ? d : {
+        ...d,
+        ...(coursApporte && !d.cours ? { cours: coursApporte } : {}),
+        cards: [...d.cards, ...fiches],
+      })));
       setSheet(null);
       say(`${fiches.length} fiche${fiches.length > 1 ? "s" : ""} ajoutée${fiches.length > 1 ? "s" : ""} à « ${cible.name} »`);
       return;
     }
 
-    const made = list.map((d) => ({ id: uid(), name: d.name, cards: d.cards, created: Date.now() }));
+    const made = list.map((d) => ({ id: uid(), name: d.name, cards: d.cards, created: Date.now(), ...(d.cours ? { cours: d.cours } : {}) }));
     commit([...made, ...decks]);
     setSheet(null);
     say(`${made.length} paquet${made.length > 1 ? "s" : ""} · ${fiches.length} fiches importées`);

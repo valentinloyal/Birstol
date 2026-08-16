@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { parseText, cleanName } from "../parse.js";
+import { contientFiches, extraireFiches } from "../cours.js";
 import { Ico, I } from "./Icons.jsx";
 import { lireFichier } from "../fichier.js";
 
@@ -28,7 +29,14 @@ export function ImportSheet({ decks = [], onClose, onDone, texteInitial = "", no
     const out = [];
     for (const f of Array.from(files)) {
       if (f.size > 2000000) continue;
-      const parsed = parseText(await lireFichier(f), cleanName(f.name));
+      const contenu = await lireFichier(f);
+      // Un markdown porteur de blocs « fiches » vaut cours ET fiches, déjà reliés.
+      if (contientFiches(contenu)) {
+        const { cours, fiches } = extraireFiches(contenu);
+        if (fiches.length) out.push({ name: cleanName(f.name), cards: fiches, cours });
+        continue;
+      }
+      const parsed = parseText(contenu, cleanName(f.name));
       if (parsed) out.push(parsed);
     }
     onDone(out, destination);

@@ -10,6 +10,8 @@
    utilise vraiment : titres, listes, code, gras, italique. Pas de tableaux, pas
    d'images, pas de liens — la règle du projet reste : aucune dépendance. */
 
+import { parseText } from "./parse.js";
+
 /* Identifiant stable d'une section, calculé depuis son titre. Il est stocké
    dans la fiche : il doit survivre à une réimportation du cours, donc il ne
    peut pas être un simple numéro d'ordre. */
@@ -133,6 +135,70 @@ export function fragments(ligne) {
     reste = reste.slice(m.index + t.length);
   }
   return sortie.filter((f) => f.texte !== "");
+}
+
+/* ------------------------------------------------------------------ */
+/*  Fichier unique : le cours et ses fiches                            */
+/* ------------------------------------------------------------------ */
+
+/* Un cours peut porter ses propres fiches, dans des blocs de code marqués
+   `fiches`, placés sous la section à laquelle elles se rapportent :
+
+       ## Le bytecode
+
+       Le fichier .class contient du bytecode.
+
+       ```fiches
+       Que produit javac ? ; Du bytecode dans un .class
+       ```
+
+   Un seul fichier suffit alors à tout importer, déjà relié. Le marqueur est un
+   bloc de code : il ne gêne aucun autre lecteur de markdown, et le découpage
+   existant sait déjà le repérer. */
+
+const OUVRE_FICHES = /^\s*```\s*fiches\s*$/i;
+const FERME = /^\s*```/;
+
+export const contientFiches = (markdown) =>
+  (markdown || "").split("\n").some((l) => OUVRE_FICHES.test(l));
+
+/* Rend { cours, fiches } : le markdown débarrassé de ses blocs de fiches, et
+   les fiches avec la section où elles se trouvaient. */
+export function extraireFiches(markdown) {
+  const texte = (markdown || "").replace(/\r/g, "");
+  const parties = sections(texte);
+  const lignes = texte.split("\n");
+  const gardees = [];
+  const fiches = [];
+  let rang = -1;
+  let i = 0;
+
+  while (i < lignes.length) {
+    const l = lignes[i];
+
+    if (/^#{1,2}\s+/.test(l)) { rang++; gardees.push(l); i++; continue; }
+    // sections() ouvre une « Introduction » dès la première ligne non vide :
+    // on compte de la même façon, sinon les fiches iraient à la mauvaise section.
+    if (l.trim() && rang < 0) rang = 0;
+
+    if (OUVRE_FICHES.test(l)) {
+      const bloc = [];
+      i++;
+      while (i < lignes.length && !FERME.test(lignes[i])) bloc.push(lignes[i++]);
+      i++; // on saute la clôture
+      const lu = parseText(bloc.join("\n"), "");
+      const section = parties[rang] ? parties[rang].id : "";
+      if (lu) for (const c of lu.cards) fiches.push({ ...c, ...(section ? { section } : {}) });
+      continue;
+    }
+
+    gardees.push(l);
+    i++;
+  }
+
+  // Deux lignes vides laissées par un bloc retiré se replient en une.
+  const cours = gardees.join("\n").replace(/\n{3,}/g, "\n\n").trim();
+  return { cours, fiches };
 }
 
 /* ------------------------------------------------------------------ */

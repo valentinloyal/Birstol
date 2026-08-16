@@ -1,7 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { ancre, sections, trouverSection, blocs, fragments, fichesParSection,
-  motsUtiles, proposerSection, proposerRattachements } from "../src/cours.js";
+  motsUtiles, proposerSection, proposerRattachements,
+  contientFiches, extraireFiches } from "../src/cours.js";
 
 /* ------------------------------------------------------------------ */
 /*  Ancres                                                             */
@@ -232,4 +233,95 @@ test("proposerRattachements ne traite que les fiches sans section", () => {
   assert.deepEqual(r.map((x) => x.fiche.id), ["b", "c"]);
   assert.equal(r[0].proposition.id, "le-bytecode");
   assert.equal(r[1].proposition, null);
+});
+
+/* ------------------------------------------------------------------ */
+/*  Fichier unique : le cours et ses fiches                            */
+/* ------------------------------------------------------------------ */
+
+const COMBINE = [
+  "# La JVM",
+  "",
+  "Java compile en deux temps.",
+  "",
+  "```fiches",
+  "Sur quoi tourne un programme Java ? ; Sur la JVM",
+  "```",
+  "",
+  "## Le bytecode",
+  "",
+  "Le fichier class contient du bytecode.",
+  "",
+  "```java",
+  "int x = 5;",
+  "```",
+  "",
+  "```fiches",
+  "Que produit javac ? ; Du bytecode dans un fichier class",
+  "Que fait int x = 5; ? ; Elle declare un entier",
+  "```",
+].join("\n");
+
+test("on repere un fichier qui porte ses fiches", () => {
+  assert.equal(contientFiches(COMBINE), true);
+  assert.equal(contientFiches("# Titre\n\ntexte\n\n```java\nx\n```"), false);
+  assert.equal(contientFiches(""), false);
+});
+
+test("les fiches sont extraites avec la section ou elles se trouvent", () => {
+  const { fiches } = extraireFiches(COMBINE);
+  assert.deepEqual(fiches.map((f) => [f.q, f.section]), [
+    ["Sur quoi tourne un programme Java ?", "la-jvm"],
+    ["Que produit javac ?", "le-bytecode"],
+    ["Que fait int x = 5; ?", "le-bytecode"],
+  ]);
+});
+
+test("le point-virgule du code Java survit a l'extraction", () => {
+  const { fiches } = extraireFiches(COMBINE);
+  assert.equal(fiches[2].a, "Elle declare un entier");
+});
+
+test("les blocs de fiches disparaissent du cours affiche", () => {
+  const { cours } = extraireFiches(COMBINE);
+  assert.equal(cours.includes("fiches"), false);
+  assert.equal(cours.includes("Que produit javac"), false);
+});
+
+test("les blocs de code ordinaires sont conserves", () => {
+  const { cours } = extraireFiches(COMBINE);
+  assert.ok(cours.includes("```java"));
+  assert.ok(cours.includes("int x = 5;"));
+});
+
+test("le cours nettoye se decoupe toujours en ses sections", () => {
+  const { cours } = extraireFiches(COMBINE);
+  assert.deepEqual(sections(cours).map((s) => s.titre), ["La JVM", "Le bytecode"]);
+});
+
+test("des fiches placees avant tout titre vont a l'introduction", () => {
+  const { fiches } = extraireFiches("Un texte d'abord.\n\n```fiches\nQ ; R\n```\n\n# Titre\n\nsuite");
+  assert.equal(fiches[0].section, "introduction");
+});
+
+test("un fichier sans bloc de fiches rend le cours intact et aucune fiche", () => {
+  const simple = "# Titre\n\nUn paragraphe.";
+  const { cours, fiches } = extraireFiches(simple);
+  assert.equal(cours, simple);
+  assert.deepEqual(fiches, []);
+});
+
+test("un bloc de fiches vide ne produit rien et ne casse pas", () => {
+  const { cours, fiches } = extraireFiches("# T\n\n```fiches\n```\n\ntexte");
+  assert.deepEqual(fiches, []);
+  assert.ok(cours.includes("texte"));
+});
+
+test("les fiches extraites sont des fiches completes, en boite 0", () => {
+  const { fiches } = extraireFiches(COMBINE);
+  for (const f of fiches) {
+    assert.ok(f.id, "identifiant attribue");
+    assert.equal(f.box, 0);
+  }
+  assert.equal(new Set(fiches.map((f) => f.id)).size, 3, "identifiants distincts");
 });

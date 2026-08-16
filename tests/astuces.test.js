@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { ASTUCES, PROMPT_PAQUET, PROMPT_FICHES_SEULES } from "../src/astuces.js";
 import { parseText } from "../src/parse.js";
+import { contientFiches, extraireFiches } from "../src/cours.js";
 
 /* Le prompt est une piece du parseur autant qu'un texte : s'il cesse d'exiger
    les espaces autour du point-virgule, les paquets generes seront coupes au
@@ -38,7 +39,13 @@ test("le prompt de paquet interdit ce que le rendu markdown ne sait pas afficher
 
 test("le prompt de paquet decrit le decoupage en sections", () => {
   assert.match(PROMPT_PAQUET, /##/);
-  assert.match(PROMPT_PAQUET, /Section :/);
+  assert.match(PROMPT_PAQUET, /COURTS/, "les titres doivent rester courts et distincts");
+});
+
+test("le prompt de fiches seules garde le regroupement par commentaire", () => {
+  // Ce prompt-la ne produit pas de markdown : les sections y sont annoncees
+  // par des lignes « # Section : », ignorees a l'import.
+  assert.match(PROMPT_FICHES_SEULES, /# Section :/);
 });
 
 /* L'exemple donne dans le prompt doit reellement s'importer : c'est le seul
@@ -74,4 +81,36 @@ test("les astuces qui portent un prompt le portent non vide", () => {
   const avecPrompt = ASTUCES.filter((a) => a.prompt);
   assert.equal(avecPrompt.length, 2);
   for (const a of avecPrompt) assert.ok(a.prompt.trim().length > 200);
+});
+
+/* ------------------------------------------------------------------ */
+/*  Le fichier unique decrit par le prompt doit vraiment s'importer    */
+/* ------------------------------------------------------------------ */
+
+test("le prompt de paquet demande un seul fichier, cours et fiches ensemble", () => {
+  assert.match(PROMPT_PAQUET, /UN SEUL fichier markdown/);
+  assert.match(PROMPT_PAQUET, /```fiches/);
+});
+
+test("l'exemple de fichier unique du prompt s'importe reellement", () => {
+  // On rejoue l'exemple exact que le prompt donne a l'assistant.
+  const exemple = [
+    "## Le bytecode",
+    "",
+    "Le fichier .class contient du bytecode, jamais du code machine.",
+    "",
+    "```fiches",
+    "Que produit javac ? ; Du bytecode dans un .class, jamais du code machine",
+    "Que fait int x = 5; ? ; Elle déclare un entier x valant 5",
+    "```",
+  ].join("\n");
+
+  assert.equal(contientFiches(exemple), true);
+  const { cours, fiches } = extraireFiches(exemple);
+  assert.deepEqual(fiches.map((f) => [f.q, f.a, f.section]), [
+    ["Que produit javac ?", "Du bytecode dans un .class, jamais du code machine", "le-bytecode"],
+    ["Que fait int x = 5; ?", "Elle déclare un entier x valant 5", "le-bytecode"],
+  ]);
+  assert.equal(cours.includes("javac ? ;"), false, "les fiches quittent le cours affiche");
+  assert.ok(cours.includes("jamais du code machine"), "le texte du cours reste");
 });
