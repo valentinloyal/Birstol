@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { CSS } from "./styles.js";
 import { loadDecks, saveDecks } from "./storage.js";
-import { uid } from "./outils.js";
-import { fileDuJour, filePaquet, reinitialiser } from "./revision.js";
+import { uid, mkCard } from "./outils.js";
+import { fileDuJour, filePaquet, fileSection, reinitialiser } from "./revision.js";
 import { cleanName } from "./parse.js";
 import { lirePartage, nomDuPartage, nettoyerURL, partageEnBoite, releverPartage } from "./partage.js";
 import { Home } from "./components/Home.jsx";
@@ -17,6 +17,8 @@ import { Cours } from "./components/Cours.jsx";
 import { CoursSheet } from "./components/CoursSheet.jsx";
 import { SectionSheet } from "./components/SectionSheet.jsx";
 import { AstucesSheet } from "./components/AstucesSheet.jsx";
+import { CoursMenuSheet } from "./components/CoursMenuSheet.jsx";
+import { FicheDepuisCoursSheet } from "./components/FicheDepuisCoursSheet.jsx";
 
 /* ------------------------------------------------------------------ */
 /*  Bristol — fiches de révision                                       */
@@ -120,9 +122,17 @@ export default function Bristol() {
   const ouvrirRevision = (source) =>
     setView({
       name: "study",
-      file: source.jour ? fileDuJour(decks, Date.now()) : filePaquet(source.paquet, source.filtre, Date.now()),
+      file: source.jour
+        ? fileDuJour(decks, Date.now())
+        : source.section
+        ? fileSection(source.paquet, source.section, Date.now())
+        : filePaquet(source.paquet, source.filtre, Date.now()),
       sousTitre: source.jour ? "jour" : source.paquet.name,
-      retour: source.jour ? { name: "home" } : { name: "deck", id: source.paquet.id },
+      retour: source.jour
+        ? { name: "home" }
+        : source.section
+        ? { name: "cours", id: source.paquet.id, section: source.section }
+        : { name: "deck", id: source.paquet.id },
     });
 
   return (
@@ -156,10 +166,9 @@ export default function Bristol() {
             sectionVisee={view.section}
             onBack={() => setView({ name: "deck", id: deck.id })}
             onImporter={() => setSheet({ type: "cours" })}
-            onSupprimer={() => {
-              updateDeck(deck.id, { cours: "", cards: deck.cards.map(({ section, ...c }) => c) });
-              say("Cours retiré.");
-            }}
+            onReviser={(section) => ouvrirRevision({ paquet: deck, section })}
+            onMenu={() => setSheet({ type: "coursMenu" })}
+            onNouvelleFiche={(texte, section) => setSheet({ type: "ficheDepuisCours", texte, section })}
           />
         )}
         {view.name === "study" && (
@@ -193,6 +202,34 @@ export default function Bristol() {
             deck={decks.find((d) => d.id === sheet.paquetId)}
             section={sheet.section}
             onClose={() => setSheet(null)}
+          />
+        )}
+        {sheet?.type === "ficheDepuisCours" && deck && (
+          <FicheDepuisCoursSheet
+            deck={deck}
+            texte={sheet.texte}
+            section={sheet.section}
+            onClose={() => setSheet(null)}
+            onCreer={(q, a, section) => {
+              const fiche = { ...mkCard(q, a), ...(section ? { section } : {}) };
+              updateDeck(deck.id, { cards: [...deck.cards, fiche] });
+              setSheet(null);
+              say("Fiche ajoutée au paquet.");
+            }}
+          />
+        )}
+        {sheet?.type === "coursMenu" && deck && (
+          <CoursMenuSheet
+            deck={deck}
+            onClose={() => setSheet(null)}
+            onImporter={() => setSheet({ type: "cours" })}
+            onRattacher={() => setSheet({ type: "rattacher" })}
+            onSupprimer={() => {
+              updateDeck(deck.id, { cours: "", cards: deck.cards.map(({ section, ...c }) => c) });
+              setSheet(null);
+              setView({ name: "deck", id: deck.id });
+              say("Cours retiré.");
+            }}
           />
         )}
         {sheet?.type === "cours" && deck && (

@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { sections, blocs, fragments, fichesParSection } from "../cours.js";
+import { compterSection } from "../revision.js";
 import { Ico, I } from "./Icons.jsx";
 
 /* Rendu d'une ligne : les fragments deviennent des éléments React, jamais du
@@ -37,7 +38,7 @@ function Corps({ corps }) {
 
 /* Lecture du cours d'un paquet. `sectionVisee` ouvre directement une section,
    ce qui sert au bouton « Cours » de la révision. */
-export function Cours({ deck, sectionVisee, onBack, onImporter, onSupprimer }) {
+export function Cours({ deck, sectionVisee, onBack, onImporter, onReviser, onMenu, onNouvelleFiche }) {
   const parties = sections(deck.cours);
   const compte = fichesParSection(deck);
   const [ouverte, setOuverte] = useState(sectionVisee || (parties[0] && parties[0].id) || null);
@@ -47,6 +48,23 @@ export function Cours({ deck, sectionVisee, onBack, onImporter, onSupprimer }) {
   useEffect(() => { if (scrollRef.current) scrollRef.current.scrollTop = 0; }, [ouverte]);
 
   const partie = parties.find((s) => s.id === ouverte) || parties[0] || null;
+  const aReviser = partie ? compterSection(deck, partie.id) : 0;
+
+  /* Sélection dans le cours : lire, repérer un passage, en faire une fiche.
+     La barre s'affiche en BAS de l'écran et non près du texte : sur Android,
+     la barre native de sélection occupe déjà les abords immédiats. */
+  const [selection, setSelection] = useState("");
+  useEffect(() => {
+    const relire = () => {
+      const s = window.getSelection();
+      const texte = s ? s.toString().trim() : "";
+      const dedans = s && s.rangeCount && scrollRef.current
+        && scrollRef.current.contains(s.getRangeAt(0).commonAncestorContainer);
+      setSelection(texte.length >= 3 && dedans ? texte.replace(/\s+/g, " ") : "");
+    };
+    document.addEventListener("selectionchange", relire);
+    return () => document.removeEventListener("selectionchange", relire);
+  }, []);
 
   return (
     <>
@@ -58,6 +76,9 @@ export function Cours({ deck, sectionVisee, onBack, onImporter, onSupprimer }) {
             {deck.name}
           </h1>
         </div>
+        {parties.length > 0 && (
+          <button className="iconbtn" onClick={onMenu} aria-label="Options du cours"><Ico d={I.more} /></button>
+        )}
       </div>
 
       {parties.length > 1 && (
@@ -86,12 +107,29 @@ export function Cours({ deck, sectionVisee, onBack, onImporter, onSupprimer }) {
         )}
       </div>
 
-      <div className="foot">
-        <button className="btn btn-s" onClick={onImporter}>
-          {parties.length ? "Remplacer" : "Importer un cours"}
+      {selection && (
+        <button className="depuis-selection" onClick={() => {
+          onNouvelleFiche(selection, partie?.id || "");
+          window.getSelection()?.removeAllRanges();
+          setSelection("");
+        }}>
+          <span className="pastille"><Ico d={I.plus} size={16} /></span>
+          <span>
+            <b>Faire une fiche de ce passage</b>
+            <small>{selection.length > 46 ? selection.slice(0, 46) + "…" : selection}</small>
+          </span>
         </button>
-        {parties.length > 0 && (
-          <button className="btn btn-s btn-n" style={{ color: "var(--rouge)" }} onClick={onSupprimer}>Retirer</button>
+      )}
+
+      <div className="foot">
+        {!parties.length ? (
+          <button className="btn btn-p" onClick={onImporter}>Importer un cours</button>
+        ) : aReviser ? (
+          <button className="btn btn-p" onClick={() => onReviser(partie.id)}>
+            Réviser cette section · {aReviser}
+          </button>
+        ) : (
+          <button className="btn btn-s" disabled>Aucune fiche dans cette section</button>
         )}
       </div>
     </>

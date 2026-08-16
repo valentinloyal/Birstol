@@ -130,6 +130,18 @@ export const CSS = `
   height:42px; border-radius:13px; display:flex; align-items:center; justify-content:center; gap:8px;
   font-size:14px; font-weight:600; color:var(--lavande); background-color:var(--violet2); }
 
+/* Barre de creation depuis une selection dans le cours. Placee en bas, loin de
+   la barre native de selection dAndroid qui occupe les abords du texte. */
+.depuis-selection { position:absolute; left:18px; right:18px; bottom:calc(96px + env(safe-area-inset-bottom));
+  z-index:10; display:flex; align-items:center; gap:11px; text-align:left; border-radius:14px; padding:11px 13px;
+  color:#2A0F4C; background-color:var(--or); box-shadow:0 16px 30px -16px #000; animation:up .18s; }
+.depuis-selection .pastille { width:30px; height:30px; border-radius:10px; display:grid; place-items:center;
+  flex:0 0 auto; color:var(--or); background-color:#2A0F4C; }
+.depuis-selection b { display:block; font-size:14px; }
+.depuis-selection small { display:block; font-size:11.5px; opacity:.72; margin-top:1px;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.cours ::selection { color:#2A0F4C; background-color:var(--or); }
+
 /* --- bascule oui/non --- */
 .bascule { display:flex; align-items:center; justify-content:space-between; gap:12px; width:100%; text-align:left;
   border-radius:13px; padding:11px 13px; margin-top:14px; background-color:var(--violet); }

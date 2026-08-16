@@ -1,4 +1,4 @@
-const CACHE = "bristol-v23";
+const CACHE = "bristol-v24";
 const FILES = ["./", "./index.html", "./app.js", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png", "./icon-maskable-512.png"];
 
 /* Boite aux lettres du partage Android. Android envoie les fichiers partages
