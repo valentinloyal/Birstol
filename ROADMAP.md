@@ -8,25 +8,22 @@ Ordre proposé : la dette d'abord, elle rend tout le reste moins coûteux.
 
 ---
 
-## Étape 0 — Assainir avant d'ajouter (½ journée)
+## Étape 0 — Assainir avant d'ajouter — **faite le 16 août 2026**
 
 Rien de visible pour l'utilisateur, tout de visible pour la suite.
 
-1. **Découper `source-App.jsx`** (875 lignes) en modules :
-   `parse.js` · `storage.js` · `styles.js` · `components/` · `App.jsx`.
-   esbuild gère plusieurs fichiers sans changement de commande.
-2. **Tests sur `parseText`** — c'est la pièce la plus risquée et la plus facile à
-   tester (entrée texte, sortie objet, aucune UI). Couvrir : les 4 formats, l'élection
-   du séparateur, un CSV avec en-tête (doit produire une fiche parasite : décider si
-   on la filtre), du code Java contenant des `;`, un fichier vide, un fichier binaire.
-   `node --test`, sans framework.
-3. **Rapatrier le build dans le dépôt** — `package.json` + `src/main.jsx` + un script
-   `npm run build`, pour que la reconstruction ne dépende plus d'un environnement externe.
-4. **Repasser les fonds en `background-color`** maintenant que la cause réelle est
-   connue (voir CLAUDE.md, section Pièges).
-5. **Sauvegarde manuelle de la base** — bouton « Exporter toutes mes fiches » (un JSON)
-   et « Restaurer ». Aujourd'hui, un nettoyage de Chrome efface tout sans recours.
-   *À faire tôt : c'est le seul risque de perte de données réelle.*
+1. ~~**Découper `source-App.jsx`**~~ — 13 modules, aucun au-dessus de 161 lignes.
+2. ~~**Tests sur `parseText`**~~ — 46 tests avec `node --test`, sans framework.
+   Trois défauts corrigés au passage : la fiche parasite du CSV à en-tête est
+   filtrée, une question contenant du code Java n'est plus coupée sur ses `;`,
+   un fichier binaire est refusé au lieu de produire du charabia.
+3. ~~**Rapatrier le build dans le dépôt**~~ — `npm install` puis `npm run build`,
+   React 18.3.1 et esbuild épinglés, `package-lock.json` versionné.
+4. ~~**Repasser les fonds en `background-color`**~~ — 28 fonds convertis. Le reset
+   des boutons est passé en `:where(.bx button)` : sans cela la conversion
+   rejouait le bogue des boutons invisibles.
+5. ~~**Sauvegarde manuelle de la base**~~ — bouton ⋮ sur l'accueil, export complet
+   daté et restauration avec confirmation.
 
 ## Étape 1 — La révision devient sérieuse (1 à 2 jours)
 

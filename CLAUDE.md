@@ -43,10 +43,13 @@ app.js                  bundle compilé (~176 Ko) — NE JAMAIS ÉDITER À LA MA
 src/App.jsx             composant racine : état, vues, feuilles (~100 l.)
 src/styles.js           la constante CSS
 src/storage.js          localStorage : loadDecks, saveDecks
-src/outils.js           uid, mkCard, shuffle, counts, BOX_COLOR, flat, relative, fitSize
+src/outils.js           uid, mkCard, shuffle, counts, BOX_COLOR, relative, fitSize
 src/parse.js            parseText et cleanName — pur, sans DOM, donc testable
+src/sauvegarde.js       format de sauvegarde complète — pur, testable
+src/fichier.js          seul module qui lit et écrit des fichiers (FileReader, Blob)
 src/components/         Icons, Segments, Install, Home, DeckView, Study,
-                        NewDeckSheet, ImportSheet, MenuSheet
+                        NewDeckSheet, ImportSheet, MenuSheet, BackupSheet
+tests/                  parse.test.js, sauvegarde.test.js — npm test
 src/main.jsx            point d'entrée : montage React + enregistrement du SW
 package.json            dépendances de build + script `npm run build`
 sw.js                   cache-first ; constante CACHE = "bristol-vN"
@@ -77,6 +80,17 @@ reconstruction donne le même bundle d'une machine à l'autre.
 }
 ```
 
+### Sauvegarde et export : deux formats distincts, à ne pas confondre
+
+| Geste | Où | Contenu | Sert à |
+|---|---|---|---|
+| **Exporter toutes mes fiches** | accueil, bouton ⋮ | `{ bristol: 1, exporte, paquets: [...] }` — tout, identifiants, `box` et dates compris | remonter la base à l'identique après un nettoyage du navigateur |
+| **Exporter en JSON** | menu d'un paquet | `[{ q, a }, ...]` — les seules questions et réponses | ressortir un paquet, le réimporter, le partager |
+
+« Restaurer » **remplace** toute la base, après un écran de confirmation qui annonce
+ce qui sera écrasé. Il refuse explicitement l'export d'un seul paquet et oriente
+vers Importer, parce que les deux fichiers se ressemblent assez pour être confondus.
+
 `box` encode le niveau Leitner : **0 = à revoir (rouge), 1 = presque (orange),
 2 = acquis (vert)**. Il n'y a volontairement **pas** de date de prochaine révision
 pour l'instant — voir la feuille de route.
@@ -91,7 +105,7 @@ pour l'instant — voir la feuille de route.
 
 ### Parseur d'import (`parseText`)
 
-Cœur fragile du projet, couvert par `tests/parse.test.js` (30 tests, `npm test`).
+Cœur fragile du projet, couvert par `tests/parse.test.js` (`npm test`, 46 tests avec ceux de la sauvegarde).
 Toute modification passe par un test d'abord. Essaie dans l'ordre :
 
 1. **JSON** — tableau d'objets, clés acceptées : `q|question|recto`, `a|r|answer|reponse|réponse|verso`.

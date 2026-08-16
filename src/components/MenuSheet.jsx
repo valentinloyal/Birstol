@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { telecharger } from "../fichier.js";
 
 export function MenuSheet({ deck, onClose, onRename, onReset, onDelete }) {
   const [renaming, setRenaming] = useState(false);
@@ -6,12 +7,9 @@ export function MenuSheet({ deck, onClose, onRename, onReset, onDelete }) {
   const [confirm, setConfirm] = useState(false);
 
   const exportDeck = () => {
-    const blob = new Blob([JSON.stringify(deck.cards.map(({ q, a }) => ({ q, a })), null, 2)], { type: "application/json" });
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = `${deck.name}.json`;
-    a.click();
-    URL.revokeObjectURL(a.href);
+    // Export d'un paquet : seulement q et a, pour rester reimportable ailleurs.
+    // La sauvegarde complete, elle, garde la progression (voir sauvegarde.js).
+    telecharger(deck.name + ".json", JSON.stringify(deck.cards.map(({ q, a }) => ({ q, a })), null, 2));
     onClose();
   };
 

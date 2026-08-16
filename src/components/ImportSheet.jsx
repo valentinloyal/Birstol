@@ -1,15 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { parseText, cleanName } from "../parse.js";
 import { Ico, I } from "./Icons.jsx";
+import { lireFichier } from "../fichier.js";
 
-/* Seul endroit qui touche au FileReader : parse.js doit rester pur. */
-const readFile = (f) =>
-  new Promise((res) => {
-    const r = new FileReader();
-    r.onload = () => res(String(r.result));
-    r.onerror = () => res("");
-    r.readAsText(f);
-  });
 
 export function ImportSheet({ onClose, onDone }) {
   const [tab, setTab] = useState("fichier");
@@ -27,7 +20,7 @@ export function ImportSheet({ onClose, onDone }) {
     const out = [];
     for (const f of Array.from(files)) {
       if (f.size > 2000000) continue;
-      const parsed = parseText(await readFile(f), cleanName(f.name));
+      const parsed = parseText(await lireFichier(f), cleanName(f.name));
       if (parsed) out.push(parsed);
     }
     onDone(out);

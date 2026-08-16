@@ -9,6 +9,7 @@ import { InstallSheet } from "./components/Install.jsx";
 import { NewDeckSheet } from "./components/NewDeckSheet.jsx";
 import { ImportSheet } from "./components/ImportSheet.jsx";
 import { MenuSheet } from "./components/MenuSheet.jsx";
+import { BackupSheet } from "./components/BackupSheet.jsx";
 
 /* ------------------------------------------------------------------ */
 /*  Bristol — fiches de révision                                       */
@@ -77,6 +78,18 @@ export default function Bristol() {
         )}
 
         {sheet?.type === "install" && <InstallSheet onClose={() => setSheet(null)} />}
+        {sheet?.type === "backup" && (
+          <BackupSheet
+            decks={decks}
+            onClose={() => setSheet(null)}
+            onRestore={(paquets) => {
+              commit(paquets);
+              setSheet(null);
+              setView({ name: "home" });
+              say(`${paquets.length} paquet${paquets.length > 1 ? "s" : ""} restauré${paquets.length > 1 ? "s" : ""}.`);
+            }}
+          />
+        )}
         {sheet?.type === "new" && <NewDeckSheet onClose={() => setSheet(null)} onCreate={newDeck} />}
         {sheet?.type === "import" && <ImportSheet onClose={() => setSheet(null)} onDone={addDecks} />}
         {sheet?.type === "menu" && deck && (

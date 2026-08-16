@@ -1,6 +1,7 @@
 import { counts, relative } from "../outils.js";
 import { InstallButton } from "./Install.jsx";
 import { Segments } from "./Segments.jsx";
+import { Ico, I } from "./Icons.jsx";
 
 export function Home({ decks, ready, onOpen, onSheet }) {
   const all = decks.flatMap((d) => d.cards);
@@ -14,6 +15,9 @@ export function Home({ decks, ready, onOpen, onSheet }) {
           <h1 className="display">Bristol</h1>
         </div>
         <InstallButton onHelp={() => onSheet({ type: "install" })} />
+        <button className="iconbtn" onClick={() => onSheet({ type: "backup" })} aria-label="Sauvegarde">
+          <Ico d={I.more} />
+        </button>
       </div>
 
       <div className="scroll">
