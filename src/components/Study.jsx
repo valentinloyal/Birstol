@@ -16,7 +16,7 @@ const GRADES = [
    La file est figée au montage : chaque fiche est vue une seule fois, et noter
    « À revoir » ne la remet pas en fin de file. Les ratées sont reproposées à
    l'écran de fin, dans une nouvelle session explicite. Ne pas régresser. */
-export function Study({ decks, fileInitiale, sousTitre, onNoter, onQuit }) {
+export function Study({ decks, fileInitiale, sousTitre, onNoter, onCorriger, onQuit }) {
   const [queue, setQueue] = useState(fileInitiale);
   const [pos, setPos] = useState(0);
   const [flipped, setFlipped] = useState(false);
@@ -26,6 +26,10 @@ export function Study({ decks, fileInitiale, sousTitre, onNoter, onQuit }) {
      sur les trois boutons ne coûte plus une couleur mais jusqu'à 21 jours
      d'absence : il faut pouvoir le reprendre. */
   const [histoire, setHistoire] = useState([]);
+  /* Les paquets viennent d'un LLM : les coquilles se rencontrent au moment
+     même où l'on révise. On corrige sur place plutôt que de quitter, chercher
+     la fiche dans la liste, corriger, et relancer une session. */
+  const [correction, setCorrection] = useState(null);
 
   const ref = queue[pos];
   const paquet = useMemo(() => decks.find((d) => d.id === ref?.paquetId), [decks, ref]);
@@ -61,7 +65,7 @@ export function Study({ decks, fileInitiale, sousTitre, onNoter, onQuit }) {
 
   useEffect(() => {
     const k = (e) => {
-      if (done) return;
+      if (done || correction) return;
       if (e.key === " " || e.key === "Enter") { e.preventDefault(); setFlipped((f) => !f); }
       else if (flipped && ["1", "2", "3"].includes(e.key)) grade(Number(e.key) - 1);
       else if (e.key === "Backspace") { e.preventDefault(); annuler(); }
@@ -133,14 +137,44 @@ export function Study({ decks, fileInitiale, sousTitre, onNoter, onQuit }) {
             </div>
           )}
         </div>
-        {histoire.length > 0 ? (
-          <button className="iconbtn" onClick={annuler} aria-label="Annuler la dernière note">
-            <Ico d={I.annuler} />
+        <div style={{ display: "flex", gap: 6, flex: "0 0 auto" }}>
+          {histoire.length > 0 && (
+            <button className="iconbtn" onClick={annuler} aria-label="Annuler la dernière note">
+              <Ico d={I.annuler} size={18} />
+            </button>
+          )}
+          <button className="iconbtn" aria-label="Corriger la fiche"
+            onClick={() => card && setCorrection({ q: card.q, a: card.a })}>
+            <Ico d={I.crayon} size={18} />
           </button>
-        ) : (
-          <div style={{ width: 42 }} />
-        )}
+        </div>
       </div>
+
+      {correction && (
+        <div className="sheet-bg" onClick={() => setCorrection(null)}>
+          <div className="sheet" onClick={(e) => e.stopPropagation()}>
+            <div className="grip" />
+            <h2 className="display">Corriger la fiche</h2>
+            <p className="lede">La session reprend où elle en est, sans reperdre votre place.</p>
+            <div className="label" style={{ marginTop: 0 }}>Question</div>
+            <textarea className="field" rows={3} value={correction.q} autoFocus
+              onChange={(e) => setCorrection({ ...correction, q: e.target.value })} />
+            <div className="label">Réponse</div>
+            <textarea className="field" rows={4} value={correction.a}
+              onChange={(e) => setCorrection({ ...correction, a: e.target.value })} />
+            <div style={{ display: "flex", gap: 8, marginTop: 14 }}>
+              <button className="btn btn-s" onClick={() => setCorrection(null)}>Annuler</button>
+              <button className="btn btn-p" disabled={!correction.q.trim() || !correction.a.trim()}
+                onClick={() => {
+                  onCorriger(ref.paquetId, ref.ficheId, { q: correction.q.trim(), a: correction.a.trim() });
+                  setCorrection(null);
+                }}>
+                Enregistrer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="stage">
         <div className="stack">

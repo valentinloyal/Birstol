@@ -74,6 +74,14 @@ export default function Bristol() {
       cards: d.cards.map((c) => (c.id === ficheId ? { ...c, ...maj } : c)),
     })));
 
+  /* Corriger une fiche ne touche ni à sa boîte ni à son échéance : on répare
+     une coquille, on ne réévalue pas ce qui est su. */
+  const corrigerFiche = (paquetId, ficheId, texte) =>
+    commit(decks.map((d) => (d.id !== paquetId ? d : {
+      ...d,
+      cards: d.cards.map((c) => (c.id === ficheId ? { ...c, ...texte } : c)),
+    })));
+
   // La file est construite une fois, au moment d'ouvrir la révision : elle est
   // ensuite figée par Study, ce qui garantit une fiche vue une seule fois.
   const ouvrirRevision = (source) =>
@@ -114,6 +122,7 @@ export default function Bristol() {
             fileInitiale={view.file}
             sousTitre={view.sousTitre}
             onNoter={noterFiche}
+            onCorriger={corrigerFiche}
             onQuit={() => setView(view.retour)}
           />
         )}
