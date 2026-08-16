@@ -2,7 +2,8 @@ import { useState, useEffect, useCallback } from "react";
 import { CSS } from "./styles.js";
 import { loadDecks, saveDecks } from "./storage.js";
 import { uid } from "./outils.js";
-import { fileDuJour, filePaquet } from "./revision.js";
+import { fileDuJour, filePaquet, reinitialiser } from "./revision.js";
+import { lirePartage, nomDuPartage, nettoyerURL } from "./partage.js";
 import { Home } from "./components/Home.jsx";
 import { DeckView } from "./components/DeckView.jsx";
 import { Study } from "./components/Study.jsx";
@@ -24,7 +25,20 @@ export default function Bristol() {
   const [sheet, setSheet] = useState(null);
   const [toast, setToast] = useState("");
 
-  useEffect(() => { loadDecks().then((d) => { setDecks(d); setReady(true); }); }, []);
+  useEffect(() => {
+    loadDecks().then((charges) => {
+      setDecks(charges);
+      setReady(true);
+      /* Un partage reçu ouvre la feuille d'import déjà remplie, plutôt que de
+         créer un paquet tout seul : on partage vite une phrase ou un lien par
+         mégarde, et le parseur en tirerait une fiche parasite sans rien dire. */
+      const recu = lirePartage(location.search);
+      if (recu) {
+        nettoyerURL();
+        setSheet({ type: "import", texte: recu.texte, nom: nomDuPartage(recu.titre) });
+      }
+    });
+  }, []);
 
   const commit = useCallback((next) => { setDecks(next); saveDecks(next); }, []);
   const say = (m) => { setToast(m); setTimeout(() => setToast(""), 2400); };
@@ -118,14 +132,22 @@ export default function Bristol() {
           />
         )}
         {sheet?.type === "new" && <NewDeckSheet onClose={() => setSheet(null)} onCreate={newDeck} />}
-        {sheet?.type === "import" && <ImportSheet onClose={() => setSheet(null)} onDone={addDecks} />}
+        {sheet?.type === "import" && (
+          <ImportSheet
+            onClose={() => setSheet(null)}
+            onDone={addDecks}
+            texteInitial={sheet.texte || ""}
+            nomInitial={sheet.nom || ""}
+          />
+        )}
         {sheet?.type === "menu" && deck && (
           <MenuSheet
             deck={deck}
             onClose={() => setSheet(null)}
             onRename={(name) => { updateDeck(deck.id, { name }); setSheet(null); }}
             onReset={() => {
-              updateDeck(deck.id, { cards: deck.cards.map((c) => ({ ...c, box: 0 })) });
+              const maintenant = Date.now();
+              updateDeck(deck.id, { cards: deck.cards.map((c) => reinitialiser(c, maintenant)) });
               setSheet(null);
               say("Progression remise à zéro.");
             }}

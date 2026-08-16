@@ -47,10 +47,11 @@ src/outils.js           uid, mkCard, shuffle, counts, BOX_COLOR, relative, fitSi
 src/parse.js            parseText et cleanName — pur, sans DOM, donc testable
 src/sauvegarde.js       format de sauvegarde complète — pur, testable
 src/revision.js         échéances, files du jour, migration — pur, testable
+src/partage.js          réception d'un partage Android — pur, testable
 src/fichier.js          seul module qui lit et écrit des fichiers (FileReader, Blob)
 src/components/         Icons, Segments, Install, Home, DeckView, Study,
                         NewDeckSheet, ImportSheet, MenuSheet, BackupSheet
-tests/                  parse, sauvegarde, revision — npm test, 72 tests
+tests/                  parse, sauvegarde, revision, partage — npm test, 83 tests
 src/main.jsx            point d'entrée : montage React + enregistrement du SW
 package.json            dépendances de build + script `npm run build`
 sw.js                   cache-first ; constante CACHE = "bristol-vN"
@@ -153,6 +154,17 @@ Deux garde-fous : une **ligne d'en-tête de CSV** (`question;réponse`) est reti
 elle est en tête et qu'il reste des fiches derrière ; un **fichier binaire** (présence
 d'un NUL, ou plus de 1 % de caractères de contrôle) est refusé au lieu de produire
 une fiche de charabia.
+
+### Partage Android (`share_target`)
+
+Déclaré en **GET** dans le manifeste : Android rouvre l'app avec le texte partagé
+en paramètre d'URL, sans service worker. Le texte reçu **n'est jamais importé tout
+seul** : il ouvre la feuille d'import déjà remplie, sur l'onglet texte. On partage
+vite une phrase ou un lien par mégarde, et le parseur en tirerait une fiche parasite
+sans rien dire — vu à l'essai, une phrase contenant une virgule suffisait.
+
+Le partage de **fichiers** n'est pas fait : il impose un POST intercepté par le
+service worker, qui ne peut se vérifier que sur un téléphone.
 
 Le format attendu des LLM est documenté dans `bristol-format-fiches.md`, hors dépôt,
 utilisé comme connaissance de projet côté Claude.

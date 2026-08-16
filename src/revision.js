@@ -37,6 +37,16 @@ export function noter(note, intervalPrecedent, maintenant) {
 
 export const estDue = (fiche, maintenant) => !fiche.due || fiche.due <= maintenant;
 
+/* Remise à zéro d'une fiche : la boîte seule ne suffit pas, il faut aussi
+   ramener l'échéance à aujourd'hui, sans quoi « progression remise à zéro »
+   laisserait le paquet muet jusqu'à la date déjà posée. */
+export const reinitialiser = (fiche, maintenant) => ({
+  ...fiche,
+  box: 0,
+  interval: INTERVALLES[0],
+  due: debutDuJour(maintenant),
+});
+
 /* Une fiche d'avant les dates a un `box` mais pas de `due` : elle est due
    aujourd'hui, et hérite de l'intervalle correspondant à son niveau. */
 export function migrerFiche(fiche, maintenant) {

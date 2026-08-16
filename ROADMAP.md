@@ -38,9 +38,10 @@ Rien de visible pour l'utilisateur, tout de visible pour la suite.
 
 ## Étape 2 — Confort de saisie (1 jour)
 
-9. **Web Share Target** — déclarer `share_target` dans le manifeste pour recevoir un
-   fichier `.csv` partagé depuis une autre app Android. Le partage devient le geste
-   d'import naturel, plus besoin de passer par le sélecteur de fichiers.
+9. **Web Share Target** — *à moitié fait le 18 août 2026.* Le partage de **texte**
+   fonctionne : Android rouvre l'app, qui présente la feuille d'import déjà remplie.
+   Le partage de **fichiers** reste à faire : il impose un POST intercepté par le
+   service worker, qui ne se vérifie que sur un téléphone.
 10. **Fusionner dans un paquet existant** à l'import, au lieu de toujours créer un paquet.
 11. **Détection des doublons et des quasi-doublons** à l'import — utile : le paquet Java
     contient déjà deux fiches dont la réponse est la même paire bytecode/`.class`.

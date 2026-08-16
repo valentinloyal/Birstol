@@ -4,11 +4,15 @@ import { Ico, I } from "./Icons.jsx";
 import { lireFichier } from "../fichier.js";
 
 
-export function ImportSheet({ onClose, onDone }) {
-  const [tab, setTab] = useState("fichier");
+/* `texteInitial` et `nomInitial` servent au partage Android : la feuille
+   s'ouvre déjà remplie, sur l'onglet texte, et l'utilisateur voit ce qui va
+   être créé avant de valider. Importer un partage en silence créerait un
+   paquet parasite dès qu'on partage une phrase ou un lien par mégarde. */
+export function ImportSheet({ onClose, onDone, texteInitial = "", nomInitial = "" }) {
+  const [tab, setTab] = useState(texteInitial ? "texte" : "fichier");
   const [hot, setHot] = useState(false);
-  const [name, setName] = useState("");
-  const [text, setText] = useState("");
+  const [name, setName] = useState(nomInitial);
+  const [text, setText] = useState(texteInitial);
   const fileRef = useRef(null);
   const dirRef = useRef(null);
 

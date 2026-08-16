@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   INTERVALLES, debutDuJour, enJours, noter, estDue, migrerFiche, migrerPaquets,
-  filePaquet, fileDuJour, compterDues, prochaineEcheance, dansCombien,
+  filePaquet, fileDuJour, compterDues, prochaineEcheance, dansCombien, reinitialiser,
 } from "../src/revision.js";
 
 /* Un mardi 12 h, pour que les calculs de journée ne dependent pas de l'heure du test. */
@@ -189,4 +189,22 @@ test("dansCombien parle en francais et compte en journees", () => {
   // 23 h ce soir reste aujourd'hui, 1 h demain matin est bien demain
   assert.equal(dansCombien(new Date(2026, 7, 18, 23, 0).getTime(), MIDI), "aujourd'hui");
   assert.equal(dansCombien(new Date(2026, 7, 19, 1, 0).getTime(), MIDI), "demain");
+});
+
+/* ------------------------------------------------------------------ */
+/*  Remise a zero                                                      */
+/* ------------------------------------------------------------------ */
+
+test("remettre a zero ramene aussi l'echeance a aujourd'hui", () => {
+  // Sans cela, « progression remise a zero » laisserait le paquet muet
+  // jusqu'a la date deja posee.
+  const acquise = fiche("a", 2, MIDI + enJours(21), 21);
+  const remise = reinitialiser(acquise, MIDI);
+  assert.deepEqual([remise.box, remise.interval, remise.due], [0, 1, MINUIT]);
+  assert.equal(estDue(remise, MIDI), true);
+});
+
+test("remettre a zero ne touche ni a la question ni a la reponse", () => {
+  const remise = reinitialiser(fiche("a", 2, MIDI, 21), MIDI);
+  assert.deepEqual([remise.id, remise.q, remise.a], ["a", "qa", "aa"]);
 });
