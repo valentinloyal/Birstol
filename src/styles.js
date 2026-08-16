@@ -140,6 +140,10 @@ export const CSS = `
 .field { width:100%; border:1.5px solid var(--violet3); color:var(--clair); border-radius:13px; padding:12px 14px; resize:vertical;
   background-color:var(--violet2); }
 .field::placeholder { color:#7C6A9C; }
+select.field { -webkit-appearance:none; appearance:none; padding-right:34px;
+  background-image:url("data:image/svg+xml;charset=utf8,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27%23A98BE8%27 stroke-width=%272%27 stroke-linecap=%27round%27%3E%3Cpath d=%27M6 9l6 6 6-6%27/%3E%3C/svg%3E");
+  background-repeat:no-repeat; background-position:right 11px center; background-size:17px; }
+select.field option { background-color:var(--violet2); color:var(--clair); }
 .label { font-family:var(--mono); font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:var(--lavande); margin:14px 0 6px; }
 
 /* --- feuille modale --- */

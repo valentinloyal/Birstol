@@ -8,11 +8,15 @@ import { lireFichier } from "../fichier.js";
    s'ouvre déjà remplie, sur l'onglet texte, et l'utilisateur voit ce qui va
    être créé avant de valider. Importer un partage en silence créerait un
    paquet parasite dès qu'on partage une phrase ou un lien par mégarde. */
-export function ImportSheet({ onClose, onDone, texteInitial = "", nomInitial = "" }) {
+export function ImportSheet({ decks = [], onClose, onDone, texteInitial = "", nomInitial = "" }) {
   const [tab, setTab] = useState(texteInitial ? "texte" : "fichier");
   const [hot, setHot] = useState(false);
   const [name, setName] = useState(nomInitial);
   const [text, setText] = useState(texteInitial);
+  /* Destination : un paquet neuf, ou un paquet existant à compléter. Les
+     paquets sont générés par jour et s'empilent vite ; pouvoir verser dans
+     un paquet déjà là évite d'en accumuler une liste. */
+  const [destination, setDestination] = useState("");
   const fileRef = useRef(null);
   const dirRef = useRef(null);
 
@@ -27,7 +31,7 @@ export function ImportSheet({ onClose, onDone, texteInitial = "", nomInitial = "
       const parsed = parseText(await lireFichier(f), cleanName(f.name));
       if (parsed) out.push(parsed);
     }
-    onDone(out);
+    onDone(out, destination);
   };
 
   const onDrop = async (e) => {
@@ -54,9 +58,25 @@ export function ImportSheet({ onClose, onDone, texteInitial = "", nomInitial = "
       <div className="sheet" onClick={(e) => e.stopPropagation()}>
         <div className="grip" />
         <h2 className="display">Ajouter des fiches</h2>
-        <p className="lede">Un fichier = un paquet. Le nom du fichier devient le nom du paquet.</p>
+        <p className="lede">
+          {destination
+            ? "Les fiches rejoindront un paquet existant."
+            : "Un fichier = un paquet. Le nom du fichier devient le nom du paquet."}
+        </p>
 
-        <div className="tabs" role="tablist">
+        {decks.length > 0 && (
+          <>
+            <div className="label" style={{ marginTop: 0 }}>Destination</div>
+            <select className="field" value={destination} onChange={(e) => setDestination(e.target.value)}>
+              <option value="">Créer un nouveau paquet</option>
+              {decks.map((d) => (
+                <option key={d.id} value={d.id}>Ajouter à « {d.name} »</option>
+              ))}
+            </select>
+          </>
+        )}
+
+        <div className="tabs" role="tablist" style={{ marginTop: 16 }}>
           {["fichier", "texte"].map((t) => (
             <button key={t} role="tab" aria-selected={tab === t} onClick={() => setTab(t)}>
               {t === "fichier" ? "Fichiers" : "Coller du texte"}
@@ -94,7 +114,7 @@ export function ImportSheet({ onClose, onDone, texteInitial = "", nomInitial = "
             <button className="btn btn-p" style={{ marginTop: 14 }} disabled={!text.trim()}
               onClick={() => {
                 const p = parseText(text, name.trim() || "Paquet collé");
-                onDone(p ? [{ ...p, name: name.trim() || p.name }] : []);
+                onDone(p ? [{ ...p, name: name.trim() || p.name }] : [], destination);
               }}>
               Créer le paquet
             </button>

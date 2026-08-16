@@ -46,13 +46,23 @@ export default function Bristol() {
   const deck = view.id ? decks.find((d) => d.id === view.id) : null;
   useEffect(() => { if (view.id && ready && !deck) setView({ name: "home" }); }, [view, deck, ready]);
 
-  const addDecks = (list) => {
+  const addDecks = (list, destination) => {
     if (!list.length) { say("Aucune fiche trouvée dans ce fichier."); return; }
+    const fiches = list.flatMap((d) => d.cards);
+    const cible = destination ? decks.find((d) => d.id === destination) : null;
+
+    if (cible) {
+      // Fusion : les fiches arrivent neuves, en fin de paquet, dues aujourd'hui.
+      commit(decks.map((d) => (d.id === cible.id ? { ...d, cards: [...d.cards, ...fiches] } : d)));
+      setSheet(null);
+      say(`${fiches.length} fiche${fiches.length > 1 ? "s" : ""} ajoutée${fiches.length > 1 ? "s" : ""} à « ${cible.name} »`);
+      return;
+    }
+
     const made = list.map((d) => ({ id: uid(), name: d.name, cards: d.cards, created: Date.now() }));
     commit([...made, ...decks]);
     setSheet(null);
-    const n = made.reduce((s, d) => s + d.cards.length, 0);
-    say(`${made.length} paquet${made.length > 1 ? "s" : ""} · ${n} fiches importées`);
+    say(`${made.length} paquet${made.length > 1 ? "s" : ""} · ${fiches.length} fiches importées`);
   };
 
   const newDeck = (name) => {
@@ -143,6 +153,7 @@ export default function Bristol() {
         {sheet?.type === "new" && <NewDeckSheet onClose={() => setSheet(null)} onCreate={newDeck} />}
         {sheet?.type === "import" && (
           <ImportSheet
+            decks={decks}
             onClose={() => setSheet(null)}
             onDone={addDecks}
             texteInitial={sheet.texte || ""}
