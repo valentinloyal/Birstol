@@ -56,7 +56,15 @@ Rien de visible pour l'utilisateur, tout de visible pour la suite.
   coûte jusqu'à 21 jours d'absence de la fiche.
 - **Corriger une fiche pendant la révision**, sans quitter la session.
 - **Un cours en markdown par paquet**, découpé en sections, auquel les fiches se
-  rattachent. Consultable pendant la révision.
+  rattachent. Consultable pendant la révision, exportable en `.md`.
+- **Réviser une section du cours** depuis l'écran de lecture.
+- **Créer une fiche depuis une sélection** dans le cours : le passage devient la
+  réponse, la question reste à écrire, la section est déjà rattachée.
+- **Rattachement assisté** des fiches aux sections, par comparaison des mots.
+- **Mettre une fiche en pause** : elle sort des révisions et des compteurs sans
+  être supprimée.
+- **Un bloc Astuces sur l'accueil**, seule documentation intégrée, avec deux
+  prompts de génération prêts à copier.
 
 ## Étape 3 — Au-delà (à arbitrer)
 

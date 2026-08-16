@@ -19,6 +19,7 @@ import { SectionSheet } from "./components/SectionSheet.jsx";
 import { AstucesSheet } from "./components/AstucesSheet.jsx";
 import { CoursMenuSheet } from "./components/CoursMenuSheet.jsx";
 import { FicheDepuisCoursSheet } from "./components/FicheDepuisCoursSheet.jsx";
+import { RattacherSheet } from "./components/RattacherSheet.jsx";
 
 /* ------------------------------------------------------------------ */
 /*  Bristol — fiches de révision                                       */
@@ -202,6 +203,20 @@ export default function Bristol() {
             deck={decks.find((d) => d.id === sheet.paquetId)}
             section={sheet.section}
             onClose={() => setSheet(null)}
+          />
+        )}
+        {sheet?.type === "rattacher" && deck && (
+          <RattacherSheet
+            deck={deck}
+            onClose={() => setSheet(null)}
+            onEnregistrer={(choix) => {
+              const retenues = Object.entries(choix).filter(([, s]) => s);
+              updateDeck(deck.id, {
+                cards: deck.cards.map((c) => (choix[c.id] ? { ...c, section: choix[c.id] } : c)),
+              });
+              setSheet(null);
+              say(retenues.length + " fiche" + (retenues.length > 1 ? "s" : "") + " rattachée" + (retenues.length > 1 ? "s" : "") + ".");
+            }}
           />
         )}
         {sheet?.type === "ficheDepuisCours" && deck && (

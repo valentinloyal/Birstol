@@ -142,6 +142,12 @@ export const CSS = `
   overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .cours ::selection { color:#2A0F4C; background-color:var(--or); }
 
+.rattacher { max-height:52vh; overflow-y:auto; margin:0 -2px; padding:0 2px; }
+.rattacher > div { padding:12px 0; border-bottom:1px solid var(--violet2); }
+.rattacher > div:first-child { padding-top:0; }
+.rattacher p { margin:0 0 8px; font-size:14px; font-weight:600; line-height:1.4;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
 /* --- bascule oui/non --- */
 .bascule { display:flex; align-items:center; justify-content:space-between; gap:12px; width:100%; text-align:left;
   border-radius:13px; padding:11px 13px; margin-top:14px; background-color:var(--violet); }

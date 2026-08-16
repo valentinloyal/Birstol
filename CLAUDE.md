@@ -53,8 +53,9 @@ src/astuces.js          documentation intégrée et prompts de génération — 
 src/fichier.js          seul module qui lit et écrit des fichiers (FileReader, Blob)
 src/components/         Icons, Segments, Install, Home, DeckView, Study,
                         NewDeckSheet, ImportSheet, MenuSheet, BackupSheet,
-                        Cours, CoursSheet, SectionSheet, AstucesSheet
-tests/                  parse, sauvegarde, revision, partage, cours, astuces — 123 tests
+                        Cours, CoursSheet, SectionSheet, AstucesSheet,
+                        CoursMenuSheet, FicheDepuisCoursSheet, RattacherSheet
+tests/                  parse, sauvegarde, revision, partage, cours, astuces — 138 tests
 src/main.jsx            point d'entrée : montage React + enregistrement du SW
 package.json            dépendances de build + script `npm run build`
 sw.js                   cache-first ; constante CACHE = "bristol-vN"
@@ -86,7 +87,8 @@ reconstruction donne le même bundle d'une machine à l'autre.
       box: 0,                  // niveau Leitner, porte aussi la couleur
       interval: 1,             // délai en jours qui vient d'être appliqué
       due: 1755302400000,      // minuit du jour où la fiche redevient à réviser
-      section: "le-bytecode"   // ancre d'une section du cours, absent si non rattachée
+      section: "le-bytecode",  // ancre d'une section du cours, absent si non rattachée
+      suspendue: true          // absent si la fiche est active — voir ci-dessous
     }
   ]
 }
@@ -140,6 +142,26 @@ parseur ne divergent pas.
 
 La copie passe par le presse-papiers ; en cas de refus (hors HTTPS, fenêtre sans
 focus) le prompt est **sélectionné automatiquement**, pour qu’un appui long suffise.
+
+### Fiches en pause
+
+`suspendue: true` sort une fiche de **tout** : file du jour, révision d'un paquet,
+révision des non acquis, compteurs de l'accueil, barre de progression, prochaine
+échéance annoncée. Elle reste visible dans la liste du paquet, grisée. Le champ est
+**absent** quand la fiche est active, jamais `false`.
+
+Sert aux fiches mal tournées d'un paquet généré, qu'on ne veut ni réviser ni
+supprimer. La bascule est dans l'éditeur de fiche et dans la feuille de correction
+de la révision — c'est là qu'on les rencontre.
+
+### Rattachement assisté (`proposerSection`)
+
+Rattacher 24 fiches une par une, personne ne le fait. `cours.js` propose une section
+par fiche en comparant les mots : on écarte accents, ponctuation, mots vides et mots
+de moins de trois lettres, puis on mesure la part des mots de la fiche retrouvés dans
+la section. **Le titre de section compte double**, c'est lui qui porte le sujet. En
+dessous de 20 % de mots partagés, aucune proposition n'est faite : mieux vaut laisser
+sans section qu'imposer un lien douteux.
 
 ### Règles de révision (déjà corrigées une fois, ne pas régresser)
 

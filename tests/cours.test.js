@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { ancre, sections, trouverSection, blocs, fragments, fichesParSection } from "../src/cours.js";
+import { ancre, sections, trouverSection, blocs, fragments, fichesParSection,
+  motsUtiles, proposerSection, proposerRattachements } from "../src/cours.js";
 
 /* ------------------------------------------------------------------ */
 /*  Ancres                                                             */
@@ -154,4 +155,81 @@ test("on compte les fiches rattachees a chaque section", () => {
   assert.equal(compte.get("le-jit"), 2);
   assert.equal(compte.get("le-bytecode"), 1);
   assert.equal(compte.size, 2, "une fiche sans section ne compte nulle part");
+});
+
+/* ------------------------------------------------------------------ */
+/*  Rattachement assiste                                               */
+/* ------------------------------------------------------------------ */
+
+test("motsUtiles retire accents, ponctuation, mots vides et mots trop courts", () => {
+  // « est » et « que » sont des mots vides, « ce » fait moins de trois lettres
+  assert.deepEqual(motsUtiles("Qu'est-ce que l'héritage ?"), ["heritage"]);
+  assert.deepEqual(motsUtiles("Le JIT, dans la JVM."), ["jit", "jvm"]);
+  assert.deepEqual(motsUtiles(""), []);
+});
+
+const COURS_JAVA = `# La JVM
+
+La machine virtuelle execute le programme.
+
+## Le bytecode
+
+Le fichier class contient du bytecode produit par javac, jamais du code machine.
+
+## Le ramasse-miettes
+
+Il libere la memoire des objets devenus inaccessibles sur le tas.`;
+
+test("une fiche est proposee a la section qui parle du meme sujet", () => {
+  const parties = sections(COURS_JAVA);
+  const p = proposerSection({ q: "Que produit javac ?", a: "Du bytecode dans un fichier class" }, parties);
+  assert.equal(p.id, "le-bytecode");
+});
+
+test("une autre fiche va bien a l'autre section", () => {
+  const parties = sections(COURS_JAVA);
+  const p = proposerSection({ q: "Que fait le ramasse-miettes ?", a: "Il libere la memoire du tas" }, parties);
+  assert.equal(p.id, "le-ramasse-miettes");
+});
+
+test("une fiche hors sujet ne recoit aucune proposition", () => {
+  const parties = sections(COURS_JAVA);
+  assert.equal(proposerSection({ q: "Capitale du Perou ?", a: "Lima" }, parties), null);
+});
+
+test("le titre de section pese dans la comparaison", () => {
+  // « bytecode » n'apparait que dans le titre et une fois dans le corps
+  const parties = sections("# A\n\ntexte quelconque\n\n## Le bytecode\n\nrien de precis ici");
+  assert.equal(proposerSection({ q: "Bytecode ?", a: "Le bytecode" }, parties).id, "le-bytecode");
+});
+
+test("sans cours, ou sans mot exploitable, aucune proposition", () => {
+  assert.equal(proposerSection({ q: "a", a: "b" }, sections(COURS_JAVA)), null);
+  assert.equal(proposerSection({ q: "Le bytecode", a: "oui" }, []), null);
+});
+
+test("le seuil peut etre releve pour n'accepter que les correspondances nettes", () => {
+  const parties = sections(COURS_JAVA);
+  // Un seul mot sur quatre est partage : correspondance faible, mais reelle.
+  const fiche = { q: "Combien pese un fichier class ?", a: "Cela depend du contenu" };
+  assert.ok(proposerSection(fiche, parties, 0.2), "acceptee au seuil courant");
+  assert.equal(proposerSection(fiche, parties, 0.8), null, "ecartee a seuil eleve");
+});
+
+test("une correspondance parfaite reste acceptee quel que soit le seuil", () => {
+  const parties = sections(COURS_JAVA);
+  const p = proposerSection({ q: "Que produit javac ?", a: "Du bytecode" }, parties, 0.99);
+  assert.equal(p.score, 1);
+});
+
+test("proposerRattachements ne traite que les fiches sans section", () => {
+  const paquet = { cours: COURS_JAVA, cards: [
+    { id: "a", q: "Que produit javac ?", a: "Du bytecode", section: "deja-la" },
+    { id: "b", q: "Que produit javac ?", a: "Du bytecode dans un fichier class" },
+    { id: "c", q: "Capitale du Perou ?", a: "Lima" },
+  ]};
+  const r = proposerRattachements(paquet);
+  assert.deepEqual(r.map((x) => x.fiche.id), ["b", "c"]);
+  assert.equal(r[0].proposition.id, "le-bytecode");
+  assert.equal(r[1].proposition, null);
 });

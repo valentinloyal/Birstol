@@ -135,6 +135,60 @@ export function fragments(ligne) {
   return sortie.filter((f) => f.texte !== "");
 }
 
+/* ------------------------------------------------------------------ */
+/*  Rattachement assisté                                               */
+/* ------------------------------------------------------------------ */
+
+/* Mots trop courants pour distinguer une section d'une autre. Les garder
+   ferait remonter la section la plus longue, pas la plus proche. */
+const VIDES = new Set([
+  "le", "la", "les", "un", "une", "des", "du", "de", "au", "aux", "et", "ou", "que",
+  "qui", "quoi", "dans", "pour", "par", "sur", "avec", "sans", "est", "sont", "ce",
+  "cet", "cette", "ces", "son", "sa", "ses", "il", "elle", "on", "en", "ne", "pas",
+  "plus", "quel", "quelle", "quels", "quelles", "fait", "faire", "peut", "sert",
+  "the", "and", "for", "with", "that", "this",
+]);
+
+/* Découpe un texte en mots comparables : sans accent, sans ponctuation, sans
+   les mots vides, et sans les mots de moins de trois lettres. */
+export function motsUtiles(texte) {
+  const sansMarques = [...(texte || "").normalize("NFD")]
+    .filter((c) => { const n = c.charCodeAt(0); return n < 0x300 || n > 0x36f; })
+    .join("");
+  return sansMarques
+    .toLowerCase()
+    .split(/[^a-z0-9]+/)
+    .filter((m) => m.length >= 3 && !VIDES.has(m));
+}
+
+/* Propose une section pour une fiche, par comptage des mots partagés.
+   Rend { id, score } où score est la part des mots de la fiche retrouvés dans
+   la section, ou null quand rien ne dépasse le seuil. Le seuil existe pour
+   qu'une proposition douteuse n'aille pas s'imposer toute seule. */
+export function proposerSection(fiche, parties, seuil = 0.2) {
+  const mots = new Set(motsUtiles(fiche.q + " " + fiche.a));
+  if (!mots.size || !parties.length) return null;
+
+  let meilleure = null;
+  for (const s of parties) {
+    // Le titre pèse double : c'est lui qui porte le sujet de la section.
+    const dedans = new Set(motsUtiles(s.titre + " " + s.titre + " " + s.corps));
+    let communs = 0;
+    for (const m of mots) if (dedans.has(m)) communs++;
+    const score = communs / mots.size;
+    if (!meilleure || score > meilleure.score) meilleure = { id: s.id, score };
+  }
+  return meilleure && meilleure.score >= seuil ? meilleure : null;
+}
+
+/* Une proposition par fiche non rattachée, dans l'ordre du paquet. */
+export function proposerRattachements(paquet, seuil = 0.2) {
+  const parties = sections(paquet.cours);
+  return (paquet.cards || [])
+    .filter((c) => !c.section)
+    .map((c) => ({ fiche: c, proposition: proposerSection(c, parties, seuil) }));
+}
+
 /* Combien de fiches du paquet renvoient à chaque section. */
 export function fichesParSection(paquet) {
   const compte = new Map();
