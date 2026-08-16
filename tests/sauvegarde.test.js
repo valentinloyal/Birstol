@@ -66,6 +66,23 @@ test("la programmation des revisions survit a l'aller-retour", () => {
                    BASE[0].cards.map((c) => [c.interval, c.due]));
 });
 
+test("le cours et les liens de section survivent a l'aller-retour", () => {
+  // Les perdre viderait la moitie du travail : le cours et ce qui l'attache aux fiches.
+  const avec = [{
+    id: "p", name: "Java", created: 1, cours: "# La JVM\n\nDeux temps.",
+    cards: [{ id: "a", q: "q", a: "r", box: 0, interval: 1, due: 2, section: "la-jvm" }],
+  }];
+  const relu = lireSauvegarde(JSON.stringify(construireSauvegarde(avec)));
+  assert.equal(relu[0].cours, "# La JVM\n\nDeux temps.");
+  assert.equal(relu[0].cards[0].section, "la-jvm");
+});
+
+test("un paquet sans cours ne se voit pas ajouter un champ vide", () => {
+  const relu = lireSauvegarde(JSON.stringify([{ name: "P", cards: [{ q: "a", a: "b" }] }]));
+  assert.equal("cours" in relu[0], false);
+  assert.equal("section" in relu[0].cards[0], false);
+});
+
 test("une sauvegarde d'avant les dates ne s'invente pas d'echeance", () => {
   // Sans due ni interval, c'est la migration au chargement qui completera.
   const paquets = lireSauvegarde(JSON.stringify([{ name: "Ancien", cards: [{ q: "a", a: "b", box: 2 }] }]));

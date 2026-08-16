@@ -48,10 +48,12 @@ src/parse.js            parseText et cleanName — pur, sans DOM, donc testable
 src/sauvegarde.js       format de sauvegarde complète — pur, testable
 src/revision.js         échéances, files du jour, migration — pur, testable
 src/partage.js          réception d'un partage Android — pur, testable
+src/cours.js            markdown : sections, blocs, styles — pur, testable
 src/fichier.js          seul module qui lit et écrit des fichiers (FileReader, Blob)
 src/components/         Icons, Segments, Install, Home, DeckView, Study,
-                        NewDeckSheet, ImportSheet, MenuSheet, BackupSheet
-tests/                  parse, sauvegarde, revision, partage — npm test, 83 tests
+                        NewDeckSheet, ImportSheet, MenuSheet, BackupSheet,
+                        Cours, CoursSheet, SectionSheet
+tests/                  parse, sauvegarde, revision, partage, cours — 108 tests
 src/main.jsx            point d'entrée : montage React + enregistrement du SW
 package.json            dépendances de build + script `npm run build`
 sw.js                   cache-first ; constante CACHE = "bristol-vN"
@@ -76,12 +78,14 @@ reconstruction donne le même bundle d'une machine à l'autre.
   name: "Java-socle-jour0",
   created: 1755300000000,
   lastStudied: 1755330000000,   // absent tant que jamais révisé
+  cours: "# La JVM\n…",         // markdown, absent tant qu'aucun cours n'est importé
   cards: [
     {
       id: "e5f6g7h8", q: "…", a: "…",
       box: 0,                  // niveau Leitner, porte aussi la couleur
       interval: 1,             // délai en jours qui vient d'être appliqué
-      due: 1755302400000       // minuit du jour où la fiche redevient à réviser
+      due: 1755302400000,      // minuit du jour où la fiche redevient à réviser
+      section: "le-bytecode"   // ancre d'une section du cours, absent si non rattachée
     }
   ]
 }
@@ -101,6 +105,25 @@ vers Importer, parce que les deux fichiers se ressemblent assez pour être confo
 `box` encode le niveau Leitner : **0 = à revoir (rouge), 1 = presque (orange),
 2 = acquis (vert)**. Il n'y a volontairement **pas** de date de prochaine révision
 pour l'instant — voir la feuille de route.
+
+### Le cours d'un paquet (`cours.js`)
+
+Un paquet peut porter **un cours en markdown**, découpé en sections par ses titres
+`#` et `##`. Une fiche peut pointer une section par son ancre ; pendant la révision,
+une icône ouvre alors ce passage **en feuille**, sans démonter la session.
+
+**Pourquoi markdown et pas PDF** : lire un PDF dans le navigateur impose `pdf.js`,
+environ 1 Mo — cinq fois le bundle entier — pour n'en tirer qu'un texte au découpage
+incertain. Le markdown est du texte : il se stocke tel quel et ses titres donnent
+gratuitement le découpage dont les fiches ont besoin.
+
+L'ancre est calculée depuis le titre (`Le bytecode` → `le-bytecode`), pas depuis un
+numéro d'ordre : elle survit ainsi à une réimportation du cours où l'ordre change.
+Deux sections de même titre reçoivent un suffixe (`exercices`, `exercices-2`).
+
+Le rendu est **volontairement partiel** : titres, listes, code, gras, italique,
+citations. Ni tableaux, ni images, ni liens — la règle du projet reste : aucune
+dépendance. Le markdown est transformé en éléments React, **jamais** injecté en HTML.
 
 ### Règles de révision (déjà corrigées une fois, ne pas régresser)
 

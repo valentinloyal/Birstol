@@ -16,7 +16,7 @@ const GRADES = [
    La file est figée au montage : chaque fiche est vue une seule fois, et noter
    « À revoir » ne la remet pas en fin de file. Les ratées sont reproposées à
    l'écran de fin, dans une nouvelle session explicite. Ne pas régresser. */
-export function Study({ decks, fileInitiale, sousTitre, onNoter, onCorriger, onQuit }) {
+export function Study({ decks, fileInitiale, sousTitre, onNoter, onCorriger, onCours, onQuit }) {
   const [queue, setQueue] = useState(fileInitiale);
   const [pos, setPos] = useState(0);
   const [flipped, setFlipped] = useState(false);
@@ -182,6 +182,12 @@ export function Study({ decks, fileInitiale, sousTitre, onNoter, onCorriger, onQ
           {histoire.length > 0 && (
             <button className="iconbtn" onClick={annuler} aria-label="Annuler la dernière note">
               <Ico d={I.annuler} size={18} />
+            </button>
+          )}
+          {card?.section && (
+            <button className="iconbtn" aria-label="Voir le cours"
+              onClick={() => onCours(ref.paquetId, card.section)}>
+              <Ico d={I.cours} size={18} />
             </button>
           )}
           <button className="iconbtn" aria-label="Corriger la fiche"

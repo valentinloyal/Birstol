@@ -1,4 +1,4 @@
-const CACHE = "bristol-v19";
+const CACHE = "bristol-v20";
 const FILES = ["./", "./index.html", "./app.js", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png", "./icon-maskable-512.png"];
 
 self.addEventListener("install", (e) => {

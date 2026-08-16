@@ -42,13 +42,22 @@ Rien de visible pour l'utilisateur, tout de visible pour la suite.
    fonctionne : Android rouvre l'app, qui présente la feuille d'import déjà remplie.
    Le partage de **fichiers** reste à faire : il impose un POST intercepté par le
    service worker, qui ne se vérifie que sur un téléphone.
-10. **Fusionner dans un paquet existant** à l'import, au lieu de toujours créer un paquet.
+10. ~~**Fusionner dans un paquet existant** à l'import~~ — fait le 18 août 2026.
 11. **Détection des doublons et des quasi-doublons** à l'import — utile : le paquet Java
     contient déjà deux fiches dont la réponse est la même paire bytecode/`.class`.
     Comparaison sur la réponse normalisée, proposition de fusion.
-12. **Recherche et réorganisation** dans la liste des fiches d'un paquet.
-13. **Gestes** — glisser à droite pour « acquis », à gauche pour « à revoir ».
-    À faire seulement après les dates de révision, sinon on optimise un geste qui va changer.
+12. **Recherche** ~~et réorganisation~~ dans la liste des fiches d'un paquet — la
+    recherche est faite le 18 août 2026, la réorganisation reste à faire.
+13. ~~**Gestes** — glisser à droite pour « acquis », à gauche pour « à revoir »~~ —
+    fait le 18 août 2026, après les dates de révision comme prévu.
+
+### Ajouts hors feuille de route initiale, faits le 18 août 2026
+
+- **Annuler la dernière note** en révision. Depuis les échéances, un mauvais appui
+  coûte jusqu'à 21 jours d'absence de la fiche.
+- **Corriger une fiche pendant la révision**, sans quitter la session.
+- **Un cours en markdown par paquet**, découpé en sections, auquel les fiches se
+  rattachent. Consultable pendant la révision.
 
 ## Étape 3 — Au-delà (à arbitrer)
 

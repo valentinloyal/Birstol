@@ -12,6 +12,9 @@ import { NewDeckSheet } from "./components/NewDeckSheet.jsx";
 import { ImportSheet } from "./components/ImportSheet.jsx";
 import { MenuSheet } from "./components/MenuSheet.jsx";
 import { BackupSheet } from "./components/BackupSheet.jsx";
+import { Cours } from "./components/Cours.jsx";
+import { CoursSheet } from "./components/CoursSheet.jsx";
+import { SectionSheet } from "./components/SectionSheet.jsx";
 
 /* ------------------------------------------------------------------ */
 /*  Bristol — fiches de révision                                       */
@@ -123,7 +126,20 @@ export default function Bristol() {
             onBack={() => setView({ name: "home" })}
             onUpdate={(p) => updateDeck(deck.id, p)}
             onStudy={(filtre) => ouvrirRevision({ paquet: deck, filtre })}
+            onCours={() => setView({ name: "cours", id: deck.id })}
             onSheet={setSheet}
+          />
+        )}
+        {view.name === "cours" && deck && (
+          <Cours
+            deck={deck}
+            sectionVisee={view.section}
+            onBack={() => setView({ name: "deck", id: deck.id })}
+            onImporter={() => setSheet({ type: "cours" })}
+            onSupprimer={() => {
+              updateDeck(deck.id, { cours: "", cards: deck.cards.map(({ section, ...c }) => c) });
+              say("Cours retiré.");
+            }}
           />
         )}
         {view.name === "study" && (
@@ -133,6 +149,7 @@ export default function Bristol() {
             sousTitre={view.sousTitre}
             onNoter={noterFiche}
             onCorriger={corrigerFiche}
+            onCours={(paquetId, section) => setSheet({ type: "section", paquetId, section })}
             onQuit={() => setView(view.retour)}
           />
         )}
@@ -147,6 +164,24 @@ export default function Bristol() {
               setSheet(null);
               setView({ name: "home" });
               say(`${paquets.length} paquet${paquets.length > 1 ? "s" : ""} restauré${paquets.length > 1 ? "s" : ""}.`);
+            }}
+          />
+        )}
+        {sheet?.type === "section" && (
+          <SectionSheet
+            deck={decks.find((d) => d.id === sheet.paquetId)}
+            section={sheet.section}
+            onClose={() => setSheet(null)}
+          />
+        )}
+        {sheet?.type === "cours" && deck && (
+          <CoursSheet
+            deck={deck}
+            onClose={() => setSheet(null)}
+            onDone={(texte) => {
+              updateDeck(deck.id, { cours: texte });
+              setSheet(null);
+              say("Cours enregistré.");
             }}
           />
         )}

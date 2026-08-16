@@ -51,6 +51,8 @@ export function lireSauvegarde(texte) {
       name: typeof d.name === "string" && d.name.trim() ? d.name.trim() : "Sans titre",
       created: Number.isFinite(d.created) ? d.created : Date.now(),
       ...(Number.isFinite(d.lastStudied) ? { lastStudied: d.lastStudied } : {}),
+      // Le cours fait partie du paquet : le perdre viderait la moitié du travail.
+      ...(typeof d.cours === "string" && d.cours.trim() ? { cours: d.cours } : {}),
       cards: d.cards
         .filter(estFiche)
         .filter((c) => c.q.trim() && c.a.trim())
@@ -64,6 +66,8 @@ export function lireSauvegarde(texte) {
           // d'une vieille sauvegarde, elle sera reconstruite par la migration.
           ...(Number.isFinite(c.interval) ? { interval: c.interval } : {}),
           ...(Number.isFinite(c.due) ? { due: c.due } : {}),
+          // Lien vers une section du cours, quand la fiche en porte un.
+          ...(typeof c.section === "string" && c.section ? { section: c.section } : {}),
         })),
     }));
 

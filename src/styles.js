@@ -130,6 +130,32 @@ export const CSS = `
   height:42px; border-radius:13px; display:flex; align-items:center; justify-content:center; gap:8px;
   font-size:14px; font-weight:600; color:var(--lavande); background-color:var(--violet2); }
 
+/* --- cours --- */
+.sommaire { display:flex; gap:7px; overflow-x:auto; padding:0 18px 12px; flex:0 0 auto; scrollbar-width:none; }
+.sommaire::-webkit-scrollbar { display:none; }
+.sommaire button { flex:0 0 auto; height:33px; padding:0 13px; border-radius:99px; font-size:13px; font-weight:600;
+  color:var(--sourdine); background-color:var(--violet2); display:flex; align-items:center; gap:6px; }
+.sommaire button.actif { color:#2A0F4C; background-color:var(--or); }
+.sommaire button em { font-family:var(--mono); font-size:10px; font-style:normal; opacity:.7; }
+
+.cours { font-family:var(--serif); font-weight:300; font-size:17px; line-height:1.62; color:var(--clair); }
+.cours h3 { font-family:var(--ui); font-weight:900; font-style:italic; text-transform:uppercase; letter-spacing:-.015em;
+  font-size:23px; color:var(--or); margin:6px 0 14px; line-height:1.05; }
+.cours h4 { font-family:var(--ui); font-size:15px; font-weight:700; color:var(--lavande); margin:22px 0 6px; }
+.cours p { margin:0 0 14px; }
+.cours ul, .cours ol { margin:0 0 14px; padding-left:22px; }
+.cours li { margin-bottom:6px; }
+.cours b { font-weight:600; color:#FFF; }
+.cours i { font-style:italic; }
+.cours code { font-family:var(--mono); font-size:13.5px; padding:1px 5px; border-radius:5px;
+  color:var(--or); background-color:var(--violet2); }
+.cours pre { margin:0 0 16px; padding:13px 14px; border-radius:12px; overflow-x:auto;
+  background-color:var(--violet2); box-shadow:inset 0 0 0 1.5px var(--violet3); }
+.cours pre code { display:block; font-size:12.5px; line-height:1.55; color:var(--clair); background-color:transparent;
+  padding:0; white-space:pre; }
+.cours blockquote { margin:0 0 14px; padding:2px 0 2px 14px; border-left:2.5px solid var(--violet3);
+  color:var(--sourdine); font-style:italic; }
+
 /* --- recherche dans un paquet --- */
 .chercher { display:flex; align-items:center; gap:9px; border-radius:13px; padding:0 12px; margin-bottom:12px;
   height:44px; color:var(--lavande); background-color:var(--violet2); }
