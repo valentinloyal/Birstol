@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import {
   INTERVALLES, debutDuJour, enJours, noter, estDue, migrerFiche, migrerPaquets,
   filePaquet, fileDuJour, compterDues, prochaineEcheance, dansCombien, reinitialiser,
+  estActive, fileSection, compterSection,
 } from "../src/revision.js";
 
 /* Un mardi 12 h, pour que les calculs de journée ne dependent pas de l'heure du test. */
@@ -207,4 +208,54 @@ test("remettre a zero ramene aussi l'echeance a aujourd'hui", () => {
 test("remettre a zero ne touche ni a la question ni a la reponse", () => {
   const remise = reinitialiser(fiche("a", 2, MIDI, 21), MIDI);
   assert.deepEqual([remise.id, remise.q, remise.a], ["a", "qa", "aa"]);
+});
+
+/* ------------------------------------------------------------------ */
+/*  Fiches mises en pause                                              */
+/* ------------------------------------------------------------------ */
+
+const enPause = { id: "z", q: "q", a: "a", box: 0, interval: 1, due: MIDI - enJours(2), suspendue: true };
+
+test("une fiche en pause n'est jamais due", () => {
+  assert.equal(estActive(enPause), false);
+  assert.equal(estDue(enPause, MIDI), false);
+});
+
+test("une fiche en pause sort de la file du jour et du compte", () => {
+  const p = { id: "p", name: "P", cards: [fiche("a", 0, MIDI - 1, 1), enPause] };
+  assert.deepEqual(fileDuJour([p], MIDI).map((r) => r.ficheId), ["a"]);
+  assert.equal(compterDues([p], MIDI), 1);
+});
+
+test("une fiche en pause sort aussi de la revision complete d'un paquet", () => {
+  const p = { id: "p", name: "P", cards: [fiche("a", 0, MIDI, 1), enPause] };
+  assert.deepEqual(filePaquet(p, "all", MIDI).map((r) => r.ficheId), ["a"]);
+  assert.deepEqual(filePaquet(p, "todo", MIDI).map((r) => r.ficheId), ["a"]);
+});
+
+test("une fiche en pause ne fait pas annoncer une prochaine echeance", () => {
+  const p = { id: "p", name: "P", cards: [{ ...enPause, due: MIDI + enJours(2) }] };
+  assert.equal(prochaineEcheance([p], MIDI), null);
+});
+
+/* ------------------------------------------------------------------ */
+/*  File d'une section du cours                                        */
+/* ------------------------------------------------------------------ */
+
+test("la file d'une section ne prend que ses fiches, echues ou non", () => {
+  const p = { id: "p", name: "P", cards: [
+    { ...fiche("a", 0, MIDI + enJours(9), 7), section: "le-jit" },
+    { ...fiche("b", 1, MIDI, 3), section: "le-bytecode" },
+    { ...fiche("c", 0, MIDI, 1), section: "le-jit" },
+    fiche("d", 0, MIDI, 1),
+  ]};
+  assert.deepEqual(fileSection(p, "le-jit", MIDI).map((r) => r.ficheId).sort(), ["a", "c"]);
+  assert.equal(compterSection(p, "le-jit"), 2);
+  assert.equal(compterSection(p, "inconnue"), 0);
+});
+
+test("une fiche en pause ne compte pas dans sa section", () => {
+  const p = { id: "p", name: "P", cards: [{ ...enPause, section: "s" }, { ...fiche("a", 0, MIDI, 1), section: "s" }] };
+  assert.equal(compterSection(p, "s"), 1);
+  assert.deepEqual(fileSection(p, "s", MIDI).map((r) => r.ficheId), ["a"]);
 });

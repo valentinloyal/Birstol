@@ -130,6 +130,21 @@ export const CSS = `
   height:42px; border-radius:13px; display:flex; align-items:center; justify-content:center; gap:8px;
   font-size:14px; font-weight:600; color:var(--lavande); background-color:var(--violet2); }
 
+/* --- bascule oui/non --- */
+.bascule { display:flex; align-items:center; justify-content:space-between; gap:12px; width:100%; text-align:left;
+  border-radius:13px; padding:11px 13px; margin-top:14px; background-color:var(--violet); }
+.bascule b { display:block; font-size:14px; font-weight:600; }
+.bascule small { display:block; font-size:11.5px; color:var(--sourdine); margin-top:2px; }
+.bascule i { width:44px; height:26px; border-radius:99px; flex:0 0 auto; position:relative; transition:background-color .15s;
+  background-color:var(--violet3); }
+.bascule i::after { content:""; position:absolute; top:3px; left:3px; width:20px; height:20px; border-radius:99px;
+  background-color:var(--clair); transition:transform .15s; }
+.bascule i.on { background-color:var(--or); }
+.bascule i.on::after { transform:translateX(18px); }
+
+.row.en-pause { opacity:.5; }
+.row.en-pause .a { color:var(--or); }
+
 /* --- astuces --- */
 .astuces-bloc { display:flex; align-items:center; gap:12px; width:100%; text-align:left; border-radius:14px;
   padding:13px 14px; margin:6px 0 4px; background-color:var(--violet2);

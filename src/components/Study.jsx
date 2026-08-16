@@ -191,7 +191,7 @@ export function Study({ decks, fileInitiale, sousTitre, onNoter, onCorriger, onC
             </button>
           )}
           <button className="iconbtn" aria-label="Corriger la fiche"
-            onClick={() => card && setCorrection({ q: card.q, a: card.a })}>
+            onClick={() => card && setCorrection({ q: card.q, a: card.a, suspendue: !!card.suspendue })}>
             <Ico d={I.crayon} size={18} />
           </button>
         </div>
@@ -209,11 +209,19 @@ export function Study({ decks, fileInitiale, sousTitre, onNoter, onCorriger, onC
             <div className="label">Réponse</div>
             <textarea className="field" rows={4} value={correction.a}
               onChange={(e) => setCorrection({ ...correction, a: e.target.value })} />
+            <button className="bascule" onClick={() => setCorrection({ ...correction, suspendue: !correction.suspendue })}
+              aria-pressed={!!correction.suspendue}>
+              <span>
+                <b>Mettre en pause</b>
+                <small>Pour les fiches mal écrites qu'on ne veut pas supprimer</small>
+              </span>
+              <i className={correction.suspendue ? "on" : ""} />
+            </button>
             <div style={{ display: "flex", gap: 8, marginTop: 14 }}>
               <button className="btn btn-s" onClick={() => setCorrection(null)}>Annuler</button>
               <button className="btn btn-p" disabled={!correction.q.trim() || !correction.a.trim()}
                 onClick={() => {
-                  onCorriger(ref.paquetId, ref.ficheId, { q: correction.q.trim(), a: correction.a.trim() });
+                  onCorriger(ref.paquetId, ref.ficheId, { q: correction.q.trim(), a: correction.a.trim(), suspendue: correction.suspendue });
                   setCorrection(null);
                 }}>
                 Enregistrer

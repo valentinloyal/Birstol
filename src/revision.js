@@ -35,7 +35,13 @@ export function noter(note, intervalPrecedent, maintenant) {
   return { box, interval, due: debutDuJour(maintenant) + enJours(interval) };
 }
 
-export const estDue = (fiche, maintenant) => !fiche.due || fiche.due <= maintenant;
+/* Une fiche mise en pause sort de toutes les files et de tous les comptes :
+   les paquets écrits par une IA contiennent toujours deux ou trois fiches
+   qu'on ne veut ni réviser ni supprimer tout de suite. */
+export const estActive = (fiche) => !fiche.suspendue;
+
+export const estDue = (fiche, maintenant) =>
+  estActive(fiche) && (!fiche.due || fiche.due <= maintenant);
 
 /* Remise à zéro d'une fiche : la boîte seule ne suffit pas, il faut aussi
    ramener l'échéance à aujourd'hui, sans quoi « progression remise à zéro »
@@ -91,11 +97,21 @@ const reference = (paquet, fiche) => ({
 /* File d'un seul paquet. `filtre` : "all" tout, "todo" les non acquis,
    "jour" les seules fiches échues. */
 export function filePaquet(paquet, filtre, maintenant) {
-  let fiches = paquet.cards;
+  let fiches = paquet.cards.filter(estActive);
   if (filtre === "todo") fiches = fiches.filter((c) => (c.box || 0) < 2);
   else if (filtre === "jour") fiches = fiches.filter((c) => estDue(c, maintenant));
   return ordonner(fiches.map((c) => reference(paquet, c)));
 }
+
+/* File des fiches rattachées à une section du cours : on vient de lire le
+   passage, on enchaîne sur ce qu'il contient. */
+export function fileSection(paquet, sectionId, maintenant) {
+  const fiches = paquet.cards.filter((c) => estActive(c) && c.section === sectionId);
+  return ordonner(fiches.map((c) => reference(paquet, c)));
+}
+
+export const compterSection = (paquet, sectionId) =>
+  paquet.cards.filter((c) => estActive(c) && c.section === sectionId).length;
 
 /* File du jour, tous paquets confondus. */
 export function fileDuJour(paquets, maintenant) {
@@ -112,7 +128,7 @@ export function prochaineEcheance(paquets, maintenant) {
   let mini = null;
   for (const p of paquets)
     for (const c of p.cards)
-      if (!estDue(c, maintenant) && (mini === null || c.due < mini)) mini = c.due;
+      if (estActive(c) && !estDue(c, maintenant) && (mini === null || c.due < mini)) mini = c.due;
   return mini;
 }
 

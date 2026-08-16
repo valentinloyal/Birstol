@@ -1,13 +1,18 @@
 import { useState, useEffect, useRef } from "react";
 import { mkCard, BOX_COLOR } from "../outils.js";
 import { sections } from "../cours.js";
+import { estActive } from "../revision.js";
 import { Ico, I } from "./Icons.jsx";
 
 export function DeckView({ deck, startDraft, onBack, onUpdate, onStudy, onCours, onSheet }) {
   const [draft, setDraft] = useState(startDraft ? { q: "", a: "" } : null);
   const [recherche, setRecherche] = useState("");
   const qRef = useRef(null);
-  const restants = deck.cards.filter((c) => (c.box || 0) < 2).length;
+  // Les fiches en pause ne sont proposées à aucune révision : elles ne comptent
+  // donc dans aucun des deux boutons du pied.
+  const actives = deck.cards.filter(estActive);
+  const restants = actives.filter((c) => (c.box || 0) < 2).length;
+  const enPause = deck.cards.length - actives.length;
 
   /* Recherche sans accent ni casse : on tape « heritage », on trouve
      « héritage ». Le numéro affiché reste celui de la fiche dans le paquet,
@@ -26,11 +31,12 @@ export function DeckView({ deck, startDraft, onBack, onUpdate, onStudy, onCours,
     if (!draft.q.trim() || !draft.a.trim()) return;
     // `section` absent plutôt que vide : une fiche sans lien n'a pas de champ.
     const lien = draft.section ? { section: draft.section } : {};
+    const pause = draft.suspendue ? { suspendue: true } : {};
     const cards = draft.id
       ? deck.cards.map((c) => {
           if (c.id !== draft.id) return c;
-          const { section, ...reste } = c;
-          return { ...reste, q: draft.q.trim(), a: draft.a.trim(), ...lien };
+          const { section, suspendue, ...reste } = c;
+          return { ...reste, q: draft.q.trim(), a: draft.a.trim(), ...lien, ...pause };
         })
       : [...deck.cards, { ...mkCard(draft.q, draft.a), ...lien }];
     onUpdate({ cards });
@@ -43,7 +49,7 @@ export function DeckView({ deck, startDraft, onBack, onUpdate, onStudy, onCours,
       <div className="topbar">
         <button className="iconbtn" onClick={onBack} aria-label="Retour"><Ico d={I.back} /></button>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div className="sub">{deck.cards.length} fiches</div>
+          <div className="sub">{deck.cards.length} fiches{enPause ? ` · ${enPause} en pause` : ""}</div>
           <h1 className="display" style={{ fontSize: 21, color: "var(--clair)", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", wordBreak: "break-word" }}>{deck.name}</h1>
         </div>
         <button className="iconbtn" onClick={onCours} aria-label="Cours du paquet"><Ico d={I.cours} /></button>
@@ -68,6 +74,16 @@ export function DeckView({ deck, startDraft, onBack, onUpdate, onStudy, onCours,
                   {parties.map((s) => <option key={s.id} value={s.id}>{s.titre}</option>)}
                 </select>
               </>
+            )}
+            {draft.id && (
+              <button className="bascule" onClick={() => setDraft({ ...draft, suspendue: !draft.suspendue })}
+                aria-pressed={!!draft.suspendue}>
+                <span>
+                  <b>Mettre en pause</b>
+                  <small>{draft.suspendue ? "Écartée des révisions et des compteurs" : "La fiche reste dans le paquet, mais sort des révisions"}</small>
+                </span>
+                <i className={draft.suspendue ? "on" : ""} />
+              </button>
             )}
             <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
               <button className="btn btn-s" style={{ height: 46 }} onClick={() => setDraft(null)}>Fermer</button>
@@ -106,22 +122,22 @@ export function DeckView({ deck, startDraft, onBack, onUpdate, onStudy, onCours,
         )}
 
         {fiches.map(({ c, rang }) => (
-          <button key={c.id} className="row" onClick={() => setDraft({ id: c.id, q: c.q, a: c.a, section: c.section || "" })}>
+          <button key={c.id} className={"row" + (c.suspendue ? " en-pause" : "")} onClick={() => setDraft({ id: c.id, q: c.q, a: c.a, section: c.section || "", suspendue: !!c.suspendue })}>
             <span className="n">{String(rang + 1).padStart(2, "0")}</span>
             <span className="dot" style={{ backgroundColor: BOX_COLOR[c.box || 0] }} />
             <span style={{ flex: 1, minWidth: 0 }}>
               <span className="q" style={{ display: "block" }}>{c.q}</span>
-              <span className="a" style={{ display: "block" }}>{c.a}</span>
+              <span className="a" style={{ display: "block" }}>{c.suspendue ? "En pause · " : ""}{c.a}</span>
             </span>
           </button>
         ))}
       </div>
 
       <div className="foot">
-        <button className="btn btn-p" onClick={() => onStudy("all")} disabled={!deck.cards.length}>
-          Réviser {deck.cards.length ? `· ${deck.cards.length}` : ""}
+        <button className="btn btn-p" onClick={() => onStudy("all")} disabled={!actives.length}>
+          Réviser {actives.length ? `· ${actives.length}` : ""}
         </button>
-        {restants > 0 && restants < deck.cards.length && (
+        {restants > 0 && restants < actives.length && (
           <button className="btn btn-s btn-n" onClick={() => onStudy("todo")}>Non acquis · {restants}</button>
         )}
       </div>

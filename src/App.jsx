@@ -104,10 +104,15 @@ export default function Bristol() {
 
   /* Corriger une fiche ne touche ni à sa boîte ni à son échéance : on répare
      une coquille, on ne réévalue pas ce qui est su. */
-  const corrigerFiche = (paquetId, ficheId, texte) =>
+  const corrigerFiche = (paquetId, ficheId, maj) =>
     commit(decks.map((d) => (d.id !== paquetId ? d : {
       ...d,
-      cards: d.cards.map((c) => (c.id === ficheId ? { ...c, ...texte } : c)),
+      cards: d.cards.map((c) => {
+        if (c.id !== ficheId) return c;
+        // `suspendue` absent plutôt que false : une fiche active n'a pas le champ.
+        const { suspendue, ...reste } = { ...c, ...maj };
+        return suspendue ? { ...reste, suspendue: true } : reste;
+      }),
     })));
 
   // La file est construite une fois, au moment d'ouvrir la révision : elle est

@@ -1,12 +1,13 @@
 import { counts, relative } from "../outils.js";
-import { compterDues, prochaineEcheance, dansCombien } from "../revision.js";
+import { compterDues, prochaineEcheance, dansCombien, estActive } from "../revision.js";
 import { InstallButton } from "./Install.jsx";
 import { Segments } from "./Segments.jsx";
 import { Ico, I } from "./Icons.jsx";
 import { AstucesBloc } from "./AstucesSheet.jsx";
 
 export function Home({ decks, ready, onOpen, onJour, onSheet }) {
-  const all = decks.flatMap((d) => d.cards);
+  // Les fiches en pause sont mises de cote : elles ne pesent sur aucun compteur.
+  const all = decks.flatMap((d) => d.cards).filter(estActive);
   const [aRevoir, , acquis] = counts(all);
 
   const maintenant = Date.now();
@@ -64,7 +65,7 @@ export function Home({ decks, ready, onOpen, onJour, onSheet }) {
               {d.cards.length} fiche{d.cards.length > 1 ? "s" : ""}
               {d.lastStudied ? ` · révisé ${relative(d.lastStudied)}` : " · jamais révisé"}
             </div>
-            <Segments cards={d.cards} />
+            <Segments cards={d.cards.filter(estActive)} />
           </button>
         ))}
         <AstucesBloc onOuvrir={() => onSheet({ type: "astuces" })} />

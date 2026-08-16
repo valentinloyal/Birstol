@@ -68,6 +68,8 @@ export function lireSauvegarde(texte) {
           ...(Number.isFinite(c.due) ? { due: c.due } : {}),
           // Lien vers une section du cours, quand la fiche en porte un.
           ...(typeof c.section === "string" && c.section ? { section: c.section } : {}),
+          // Mise en pause : la perdre remettrait les fiches ecartees en circulation.
+          ...(c.suspendue === true ? { suspendue: true } : {}),
         })),
     }));
 
