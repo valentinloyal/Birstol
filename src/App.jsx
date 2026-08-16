@@ -20,6 +20,7 @@ import { AstucesSheet } from "./components/AstucesSheet.jsx";
 import { CoursMenuSheet } from "./components/CoursMenuSheet.jsx";
 import { FicheDepuisCoursSheet } from "./components/FicheDepuisCoursSheet.jsx";
 import { RattacherSheet } from "./components/RattacherSheet.jsx";
+import { LotSheet } from "./components/LotSheet.jsx";
 
 /* ------------------------------------------------------------------ */
 /*  Bristol — fiches de révision                                       */
@@ -209,6 +210,48 @@ export default function Bristol() {
             deck={decks.find((d) => d.id === sheet.paquetId)}
             section={sheet.section}
             onClose={() => setSheet(null)}
+          />
+        )}
+        {sheet?.type === "lot" && deck && (
+          <LotSheet
+            deck={deck}
+            nombre={sheet.ids.length}
+            onClose={() => setSheet(null)}
+            onSection={(section) => {
+              const dans = new Set(sheet.ids);
+              updateDeck(deck.id, {
+                cards: deck.cards.map((c) => {
+                  if (!dans.has(c.id)) return c;
+                  const { section: ancienne, ...reste } = c;
+                  return section ? { ...reste, section } : reste;
+                }),
+              });
+              sheet.vider();
+              setSheet(null);
+              say(section
+                ? `${sheet.ids.length} fiche${sheet.ids.length > 1 ? "s" : ""} rattachée${sheet.ids.length > 1 ? "s" : ""}.`
+                : "Rattachement retiré.");
+            }}
+            onPause={(enPause) => {
+              const dans = new Set(sheet.ids);
+              updateDeck(deck.id, {
+                cards: deck.cards.map((c) => {
+                  if (!dans.has(c.id)) return c;
+                  const { suspendue, ...reste } = c;
+                  return enPause ? { ...reste, suspendue: true } : reste;
+                }),
+              });
+              sheet.vider();
+              setSheet(null);
+              say(enPause ? "Fiches mises en pause." : "Fiches réactivées.");
+            }}
+            onSupprimer={() => {
+              const dans = new Set(sheet.ids);
+              updateDeck(deck.id, { cards: deck.cards.filter((c) => !dans.has(c.id)) });
+              sheet.vider();
+              setSheet(null);
+              say(`${sheet.ids.length} fiche${sheet.ids.length > 1 ? "s" : ""} supprimée${sheet.ids.length > 1 ? "s" : ""}.`);
+            }}
           />
         )}
         {sheet?.type === "rattacher" && deck && (

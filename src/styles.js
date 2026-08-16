@@ -165,6 +165,13 @@ export const CSS = `
 .bascule i.on { background-color:var(--or); }
 .bascule i.on::after { transform:translateX(18px); }
 
+.row.choisie { box-shadow:inset 0 0 0 1.5px var(--or); }
+.case { width:19px; height:19px; border-radius:6px; margin-top:2px; flex:0 0 auto; position:relative;
+  box-shadow:inset 0 0 0 1.5px var(--violet3); }
+.case.on { background-color:var(--or); box-shadow:none; }
+.case.on::after { content:""; position:absolute; left:6px; top:2px; width:5px; height:10px;
+  border:solid #2A0F4C; border-width:0 2px 2px 0; transform:rotate(42deg); }
+
 .row.en-pause { opacity:.5; }
 .row.en-pause .a { color:var(--or); }
 

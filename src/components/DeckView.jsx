@@ -7,6 +7,11 @@ import { Ico, I } from "./Icons.jsx";
 export function DeckView({ deck, startDraft, onBack, onUpdate, onStudy, onCours, onSheet }) {
   const [draft, setDraft] = useState(startDraft ? { q: "", a: "" } : null);
   const [recherche, setRecherche] = useState("");
+  /* Sélection multiple. Sur un paquet de 76 fiches, ouvrir chaque fiche pour
+     lui donner sa section est impraticable : il faut pouvoir agir sur un lot.
+     Le mode est explicite plutôt que déclenché par un appui long, qui entre en
+     conflit avec la sélection de texte du système. */
+  const [choisies, setChoisies] = useState(null);
   const qRef = useRef(null);
   // Les fiches en pause ne sont proposées à aucune révision : elles ne comptent
   // donc dans aucun des deux boutons du pied.
@@ -52,6 +57,12 @@ export function DeckView({ deck, startDraft, onBack, onUpdate, onStudy, onCours,
           <div className="sub">{deck.cards.length} fiches{enPause ? ` · ${enPause} en pause` : ""}</div>
           <h1 className="display" style={{ fontSize: 21, color: "var(--clair)", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", wordBreak: "break-word" }}>{deck.name}</h1>
         </div>
+        {deck.cards.length > 1 && (
+          <button className="iconbtn" aria-label={choisies ? "Quitter la sélection" : "Sélectionner des fiches"}
+            onClick={() => setChoisies(choisies ? null : new Set())}>
+            <Ico d={choisies ? I.close : I.cocher} />
+          </button>
+        )}
         <button className="iconbtn" onClick={onCours} aria-label="Cours du paquet"><Ico d={I.cours} /></button>
         <button className="iconbtn" onClick={() => onSheet({ type: "menu" })} aria-label="Options du paquet"><Ico d={I.more} /></button>
       </div>
@@ -122,8 +133,21 @@ export function DeckView({ deck, startDraft, onBack, onUpdate, onStudy, onCours,
         )}
 
         {fiches.map(({ c, rang }) => (
-          <button key={c.id} className={"row" + (c.suspendue ? " en-pause" : "")} onClick={() => setDraft({ id: c.id, q: c.q, a: c.a, section: c.section || "", suspendue: !!c.suspendue })}>
-            <span className="n">{String(rang + 1).padStart(2, "0")}</span>
+          <button key={c.id}
+            className={"row" + (c.suspendue ? " en-pause" : "") + (choisies?.has(c.id) ? " choisie" : "")}
+            onClick={() => {
+              if (!choisies) { setDraft({ id: c.id, q: c.q, a: c.a, section: c.section || "", suspendue: !!c.suspendue }); return; }
+              // Forme fonctionnelle : deux appuis rapprochés liraient sinon le
+              // même état, et le second effacerait la sélection du premier.
+              setChoisies((avant) => {
+                const suite = new Set(avant);
+                suite.has(c.id) ? suite.delete(c.id) : suite.add(c.id);
+                return suite;
+              });
+            }}>
+            {choisies
+              ? <span className={"case" + (choisies.has(c.id) ? " on" : "")} />
+              : <span className="n">{String(rang + 1).padStart(2, "0")}</span>}
             <span className="dot" style={{ backgroundColor: BOX_COLOR[c.box || 0] }} />
             <span style={{ flex: 1, minWidth: 0 }}>
               <span className="q" style={{ display: "block" }}>{c.q}</span>
@@ -134,10 +158,24 @@ export function DeckView({ deck, startDraft, onBack, onUpdate, onStudy, onCours,
       </div>
 
       <div className="foot">
+        {choisies ? (
+          <>
+            <button className="btn btn-s" onClick={() => setChoisies((avant) =>
+              avant.size === fiches.length ? new Set() : new Set(fiches.map(({ c }) => c.id))
+            )}>
+              {choisies.size === fiches.length ? "Aucune" : "Toutes"}
+            </button>
+            <button className="btn btn-p" disabled={!choisies.size}
+              onClick={() => onSheet({ type: "lot", ids: [...choisies], vider: () => setChoisies(new Set()) })}>
+              {choisies.size ? `${choisies.size} sélectionnée${choisies.size > 1 ? "s" : ""}` : "Aucune sélection"}
+            </button>
+          </>
+        ) : (
         <button className="btn btn-p" onClick={() => onStudy("all")} disabled={!actives.length}>
           Réviser {actives.length ? `· ${actives.length}` : ""}
         </button>
-        {restants > 0 && restants < actives.length && (
+        )}
+        {!choisies && restants > 0 && restants < actives.length && (
           <button className="btn btn-s btn-n" onClick={() => onStudy("todo")}>Non acquis · {restants}</button>
         )}
       </div>

@@ -54,8 +54,9 @@ src/fichier.js          seul module qui lit et écrit des fichiers (FileReader, 
 src/components/         Icons, Segments, Install, Home, DeckView, Study,
                         NewDeckSheet, ImportSheet, MenuSheet, BackupSheet,
                         Cours, CoursSheet, SectionSheet, AstucesSheet,
-                        CoursMenuSheet, FicheDepuisCoursSheet, RattacherSheet
-tests/                  parse, sauvegarde, revision, partage, cours, astuces — 138 tests
+                        CoursMenuSheet, FicheDepuisCoursSheet, RattacherSheet,
+                        LotSheet
+tests/                  parse, sauvegarde, revision, partage, cours, astuces — 151 tests
 src/main.jsx            point d'entrée : montage React + enregistrement du SW
 package.json            dépendances de build + script `npm run build`
 sw.js                   cache-first ; constante CACHE = "bristol-vN"
@@ -153,6 +154,39 @@ révision des non acquis, compteurs de l'accueil, barre de progression, prochain
 Sert aux fiches mal tournées d'un paquet généré, qu'on ne veut ni réviser ni
 supprimer. La bascule est dans l'éditeur de fiche et dans la feuille de correction
 de la révision — c'est là qu'on les rencontre.
+
+### Un cours et ses fiches dans un seul fichier
+
+Un markdown peut porter ses fiches, dans des blocs de code marqués `fiches`,
+placés sous la section concernée :
+
+    ## Le bytecode
+
+    Le fichier .class contient du bytecode.
+
+    ```fiches
+    Que produit javac ? ; Du bytecode dans un .class
+    ```
+
+Un seul import suffit alors : les fiches arrivent déjà rattachées. Le marqueur est
+un bloc de code, il ne gêne aucun autre lecteur de markdown, et `blocs()` savait
+déjà le repérer. À l'import, `extraireFiches` sort les fiches et **retire les blocs
+du cours affiché**. Une fusion dans un paquet existant n'écrase jamais son cours.
+
+C'est ce format que produit le prompt des astuces, et `tests/astuces.test.js`
+rejoue l'exemple exact contenu dans le prompt pour vérifier qu'il s'importe.
+
+### Sélection multiple dans un paquet
+
+Un bouton de la barre du haut bascule la liste en mode sélection : cases à cocher,
+« Toutes / Aucune », puis une feuille qui applique au lot un rattachement de section,
+une mise en pause, une réactivation ou une suppression. Sans cela, rattacher 76 fiches
+demandait 76 allers-retours.
+
+Le mode est **explicite** et non déclenché par un appui long, qui entre en conflit avec
+la sélection de texte du système. Les bascules passent par la **forme fonctionnelle** de
+`setState` : deux appuis rapprochés liraient sinon le même état, et le second effacerait
+la sélection du premier — vu à l'essai, trois appuis ne cochaient qu'une fiche.
 
 ### Rattachement assisté (`proposerSection`)
 
