@@ -10,6 +10,7 @@ import {
 import { compterFiches } from "../sauvegarde.js";
 import { Connexion } from "./Connexion.jsx";
 import { CompteSheet } from "./CompteSheet.jsx";
+import Memento from "../App.jsx";
 import { Home } from "../components/Home.jsx";
 import { DeckView } from "../components/DeckView.jsx";
 import { Study } from "../components/Study.jsx";
@@ -36,6 +37,7 @@ import { LotSheet } from "../components/LotSheet.jsx";
 
 export default function MementoNuage() {
   const [utilisateur, setUtilisateur] = useState(null);
+  const [invite, setInvite] = useState(false);
   const [decks, setDecks] = useState([]);
   const [ready, setReady] = useState(false);
   const [view, setView] = useState({ name: "home" });
@@ -182,14 +184,24 @@ export default function MementoNuage() {
 
   if (!ready) return <div className="bx"><style>{CSS}</style><div className="bx-shell" /></div>;
 
+  /* Mode invité : les fiches vivent dans le localStorage de cet appareil,
+     comme la version locale — c'est d'ailleurs son composant qu'on réutilise
+     tel quel, plutôt que de dupliquer sa gestion d'état. Rien de ce qui suit
+     (comptes, synchronisation, partage) ne s'applique à ce mode. */
+  if (invite && !utilisateur) {
+    return <Memento onConnexion={() => setInvite(false)} />;
+  }
+
   if (!utilisateur) {
     return (
       <div className="bx">
         <style>{CSS}</style>
         <Connexion
+          onInvite={() => setInvite(true)}
           onConnecte={() => {
             client.auth.getSession().then(({ data }) => {
               setUtilisateur(data?.user || null);
+              setInvite(false);
               chargerPourUtilisateur();
             });
           }}

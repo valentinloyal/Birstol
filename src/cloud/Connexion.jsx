@@ -5,7 +5,7 @@ import { client } from "./client.js";
    Pas de lien cliquable — l'expéditeur gratuit de Neon est fiable pour des
    codes, pas garanti pour des liens (débit limité). Même principe pour
    l'utilisateur : rien à retenir, rien à sécuriser soi-même. */
-export function Connexion({ onConnecte }) {
+export function Connexion({ onConnecte, onInvite }) {
   const [etape, setEtape] = useState("email");
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
@@ -61,6 +61,12 @@ export function Connexion({ onConnecte }) {
               ? "Entrez votre email, un code de connexion vous sera envoyé."
               : `Un code a été envoyé à ${email}.`}
           </p>
+          {etape === "email" && onInvite && (
+            <p className="note">
+              Un compte sert à sauvegarder vos fiches en ligne et à les partager avec la communauté.
+              Sans compte, elles restent sur cet appareil.
+            </p>
+          )}
         </div>
 
         {etape === "email" ? (
@@ -71,6 +77,11 @@ export function Connexion({ onConnecte }) {
             <button className="btn btn-p" type="submit" style={{ marginTop: 14, width: "100%" }} disabled={enCours}>
               {enCours ? "Envoi…" : "Recevoir un code"}
             </button>
+            {onInvite && (
+              <button className="btn btn-s" type="button" style={{ marginTop: 8, width: "100%" }} onClick={onInvite}>
+                Continuer sans compte
+              </button>
+            )}
           </form>
         ) : (
           <form onSubmit={valider} style={{ padding: "0 18px" }}>

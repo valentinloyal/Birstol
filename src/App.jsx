@@ -27,7 +27,10 @@ import { LotSheet } from "./components/LotSheet.jsx";
 /*  Thème : violet profond, titres orange italique, fiche papier réglée */
 /* ------------------------------------------------------------------ */
 
-export default function Memento() {
+/* `onConnexion` n'est fourni que par la version en ligne, en mode invité :
+   il ramène à l'écran de connexion. Absent (version locale), la feuille de
+   sauvegarde reste telle quelle — aucun changement pour la PWA locale. */
+export default function Memento({ onConnexion } = {}) {
   const [decks, setDecks] = useState([]);
   const [ready, setReady] = useState(false);
   const [view, setView] = useState({ name: "home" });
@@ -196,6 +199,7 @@ export default function Memento() {
         {sheet?.type === "backup" && (
           <BackupSheet
             decks={decks}
+            onConnexion={onConnexion}
             onClose={() => setSheet(null)}
             onRestore={(paquets) => {
               commit(paquets);

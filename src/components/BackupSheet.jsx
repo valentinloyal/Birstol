@@ -2,7 +2,7 @@ import { useState, useRef } from "react";
 import { construireSauvegarde, lireSauvegarde, nomSauvegarde, compterFiches } from "../sauvegarde.js";
 import { lireFichier, telecharger } from "../fichier.js";
 
-export function BackupSheet({ decks, onClose, onRestore }) {
+export function BackupSheet({ decks, onClose, onRestore, onConnexion }) {
   const [enAttente, setEnAttente] = useState(null); // paquets lus, en attente de confirmation
   const [erreur, setErreur] = useState("");
   const fileRef = useRef(null);
@@ -81,6 +81,16 @@ export function BackupSheet({ decks, onClose, onRestore }) {
 
         {erreur && (
           <p className="note" style={{ color: "var(--rouge)", marginTop: 14 }}>{erreur}</p>
+        )}
+
+        {onConnexion && (
+          <>
+            <p className="note" style={{ marginTop: 16 }}>
+              Vous utilisez Memento sans compte : ces fiches restent sur cet appareil.
+              Connectez-vous pour les sauvegarder en ligne et profiter du partage communautaire.
+            </p>
+            <button className="btn btn-s" style={{ marginTop: 8 }} onClick={onConnexion}>Se connecter</button>
+          </>
         )}
       </div>
     </div>
