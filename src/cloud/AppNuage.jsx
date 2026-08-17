@@ -7,6 +7,7 @@ import {
   chargerDecks, creerDeck, supprimerDeck, majDeckChamps,
   synchroniserCartes, ajouterCartes, majCarte, versChampsCartePartiels,
 } from "./nuage.js";
+import { compterFiches } from "../sauvegarde.js";
 import { Connexion } from "./Connexion.jsx";
 import { CompteSheet } from "./CompteSheet.jsx";
 import { Home } from "../components/Home.jsx";
@@ -156,6 +157,21 @@ export default function MementoNuage() {
         : { name: "deck", id: source.paquet.id },
     });
 
+  /* Restaure une sauvegarde JSON complète : remplace tout, comme en local.
+     Optimiste pour l'écran, puis répercuté sur le serveur — dans cet ordre,
+     un échec réseau laisse l'écran à jour mais pas le compte, plutôt que
+     l'inverse (voir signalerErreur). */
+  const restaurer = (paquets) => {
+    const anciens = decks;
+    setDecks(paquets);
+    setSheet(null);
+    setView({ name: "home" });
+    say(`${paquets.length} paquet${paquets.length > 1 ? "s" : ""} · ${compterFiches(paquets)} fiches restaurées`);
+    Promise.all(anciens.map((d) => supprimerDeck(d.id)))
+      .then(() => Promise.all(paquets.map((d) => creerDeck(d))))
+      .catch(signalerErreur);
+  };
+
   const deconnecter = async () => {
     await client.auth.signOut();
     setUtilisateur(null);
@@ -233,7 +249,13 @@ export default function MementoNuage() {
         {sheet?.type === "install" && <InstallSheet onClose={() => setSheet(null)} />}
         {sheet?.type === "astuces" && <AstucesSheet onClose={() => setSheet(null)} />}
         {sheet?.type === "backup" && (
-          <CompteSheet email={utilisateur.email} onClose={() => setSheet(null)} onDeconnexion={deconnecter} />
+          <CompteSheet
+            email={utilisateur.email}
+            decks={decks}
+            onClose={() => setSheet(null)}
+            onDeconnexion={deconnecter}
+            onRestore={restaurer}
+          />
         )}
         {sheet?.type === "section" && (
           <SectionSheet
