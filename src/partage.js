@@ -37,7 +37,7 @@ export const nettoyerURL = () => history.replaceState(null, "", location.pathnam
    dans un cache dédié et redirige vers l'app avec ?partage=recu ; c'est ici
    qu'on vient relever la boîte. Le cache est effacé après lecture, pour qu'un
    simple rechargement ne réimporte pas le même partage. */
-const PARTAGE = "bristol-partage";
+const PARTAGE = "memento-partage";
 const CLE_PARTAGE = "./partage-recu";
 
 export const partageEnBoite = (recherche) =>

@@ -3,14 +3,14 @@ setlocal enabledelayedexpansion
 chcp 65001 >nul
 
 REM ============================================================
-REM  Bristol - publication sur GitHub Pages
+REM  Memento - publication sur GitHub Pages
 REM  Cree le depot, pousse le code, active Pages, ouvre l'URL.
 REM ============================================================
 
 set REPO=bristol
 
 echo.
-echo == Bristol : publication sur GitHub Pages ==
+echo == Memento : publication sur GitHub Pages ==
 echo.
 
 where gh >nul 2>&1
@@ -50,7 +50,7 @@ if not exist .git (
   git checkout -B main >nul 2>&1
 )
 git add -A || goto :err
-git diff --cached --quiet && (echo     Rien de nouveau a valider.) || git commit -m "Bristol - fiches de revision" >nul || goto :err
+git diff --cached --quiet && (echo     Rien de nouveau a valider.) || git commit -m "Memento - fiches de revision" >nul || goto :err
 
 echo [2/4] Creation du depot distant...
 gh repo view !OWNER!/!REPO! >nul 2>&1

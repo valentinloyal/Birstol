@@ -1,7 +1,7 @@
 {
   "id": "./",
-  "name": "Bristol — fiches de révision",
-  "short_name": "Bristol",
+  "name": "Memento — fiches de révision",
+  "short_name": "Memento",
   "description": "Importez un dossier de questions-réponses, ajoutez vos fiches, révisez.",
   "lang": "fr",
   "start_url": "./index.html",

@@ -1,4 +1,4 @@
-# Bristol — feuille de route
+# Memento — feuille de route
 
 État au 16 août 2026 : l'app est en production, utilisée quotidiennement, un paquet
 de 24 fiches Java en circulation. Les trois bogues bloquants (compteur gonflé, fonds

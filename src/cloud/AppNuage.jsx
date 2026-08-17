@@ -26,14 +26,14 @@ import { RattacherSheet } from "../components/RattacherSheet.jsx";
 import { LotSheet } from "../components/LotSheet.jsx";
 
 /* ------------------------------------------------------------------ */
-/*  Bristol — version en ligne                                         */
+/*  Memento — version en ligne                                         */
 /*  Même interface que la version locale ; les mêmes composants sont    */
 /*  réutilisés tels quels. Ce qui change ici : les fiches vivent sur le */
 /*  serveur, chaque mutation part en réseau derrière une mise à jour    */
 /*  optimiste de l'écran, plutôt que dans le localStorage du téléphone. */
 /* ------------------------------------------------------------------ */
 
-export default function BristolNuage() {
+export default function MementoNuage() {
   const [utilisateur, setUtilisateur] = useState(null);
   const [decks, setDecks] = useState([]);
   const [ready, setReady] = useState(false);

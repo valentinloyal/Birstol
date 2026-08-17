@@ -5,13 +5,13 @@
    modification qui en retirerait une casserait des imports en silence :
    tests/astuces.test.js vérifie que les règles critiques y figurent encore. */
 
-export const PROMPT_PAQUET = `Tu produis du matériel de révision pour Bristol, une app de fiches.
+export const PROMPT_PAQUET = `Tu produis du matériel de révision pour Memento, une app de fiches.
 Sujet : [SUJET]
 Niveau : [NIVEAU]
 Volume : [NOMBRE] fiches.
 
 Rends UN SEUL fichier markdown, nommé sujet-en-minuscules.md, contenant le cours
-ET ses fiches. Bristol importe les deux d'un coup, déjà reliés.
+ET ses fiches. Memento importe les deux d'un coup, déjà reliés.
 
 STRUCTURE
 - « # » pour le titre général, « ## » pour chaque section. Ces titres découpent

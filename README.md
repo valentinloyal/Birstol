@@ -1,4 +1,4 @@
-# Bristol — fiches de révision
+# Memento — fiches de révision
 
 Application de révision par fiches. Import d'un dossier de questions-réponses,
 création de fiches à la main, révision espacée à 3 boîtes (Leitner).
@@ -14,7 +14,7 @@ pousse le code, active Pages et ouvre l'URL.
 ```bat
 git init -b main
 git add -A
-git commit -m "Bristol"
+git commit -m "Memento"
 gh repo create bristol --public --source=. --push
 ```
 

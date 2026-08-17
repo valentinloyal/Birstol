@@ -25,7 +25,7 @@ const BASE = [
 
 test("la sauvegarde porte sa version, sa date et les paquets", () => {
   const s = construireSauvegarde(BASE);
-  assert.equal(s.bristol, VERSION);
+  assert.equal(s.memento, VERSION);
   assert.equal(s.paquets.length, 2);
   assert.ok(!Number.isNaN(Date.parse(s.exporte)), "la date doit etre lisible");
 });
@@ -37,8 +37,8 @@ test("la progression est conservee, contrairement a l'export d'un paquet", () =>
 });
 
 test("nomSauvegarde date le fichier", () => {
-  assert.equal(nomSauvegarde(new Date(2026, 7, 16)), "bristol-sauvegarde-2026-08-16.json");
-  assert.equal(nomSauvegarde(new Date(2026, 0, 3)), "bristol-sauvegarde-2026-01-03.json");
+  assert.equal(nomSauvegarde(new Date(2026, 7, 16)), "memento-sauvegarde-2026-08-16.json");
+  assert.equal(nomSauvegarde(new Date(2026, 0, 3)), "memento-sauvegarde-2026-01-03.json");
 });
 
 test("compterFiches additionne tous les paquets", () => {
@@ -151,9 +151,9 @@ test("l'export d'un seul paquet est refuse, et oriente vers Importer", () => {
 });
 
 test("une sauvegarde vide est refusee", () => {
-  refuse('{"bristol":1,"paquets":[]}', /aucun paquet/);
+  refuse('{"memento":1,"paquets":[]}', /aucun paquet/);
 });
 
 test("une sauvegarde dont aucun paquet n'est lisible est refusee", () => {
-  refuse('{"bristol":1,"paquets":[{"name":"P"},{"name":"Q"}]}', /aucun paquet lisible/);
+  refuse('{"memento":1,"paquets":[{"name":"P"},{"name":"Q"}]}', /aucun paquet lisible/);
 });

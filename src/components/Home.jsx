@@ -19,7 +19,7 @@ export function Home({ decks, ready, onOpen, onJour, onSheet }) {
       <div className="topbar">
         <div style={{ flex: 1 }}>
           <div className="sub">Fiches de révision</div>
-          <h1 className="display">Bristol</h1>
+          <h1 className="display">Memento</h1>
         </div>
         <InstallButton onHelp={() => onSheet({ type: "install" })} />
         <button className="iconbtn" onClick={() => onSheet({ type: "backup" })} aria-label="Sauvegarde">

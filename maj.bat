@@ -3,12 +3,12 @@ setlocal enabledelayedexpansion
 chcp 65001 >nul
 
 REM ============================================================
-REM  Bristol - mise a jour du site (commit + push)
+REM  Memento - mise a jour du site (commit + push)
 REM  A lancer depuis le dossier du depot.
 REM ============================================================
 
 echo.
-echo == Bristol : envoi de la mise a jour ==
+echo == Memento : envoi de la mise a jour ==
 echo.
 
 where git >nul 2>&1
@@ -31,7 +31,7 @@ if not errorlevel 1 (
   pause & exit /b 0
 )
 
-set MSG=Mise a jour Bristol
+set MSG=Mise a jour Memento
 set /p ANSWER=Message du commit [!MSG!] : 
 if not "!ANSWER!"=="" set MSG=!ANSWER!
 

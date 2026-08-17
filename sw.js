@@ -1,11 +1,11 @@
-const CACHE = "bristol-v29";
+const CACHE = "memento-v1";
 const FILES = ["./", "./index.html", "./app.js", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png", "./icon-maskable-512.png"];
 
 /* Boite aux lettres du partage Android. Android envoie les fichiers partages
    en POST ; le service worker les depose ici, et la page vient les chercher au
    demarrage. Ce cache ne doit PAS etre efface a l'activation : le POST arrive
    avant que la page ne soit ouverte. */
-const PARTAGE = "bristol-partage";
+const PARTAGE = "memento-partage";
 const CLE_PARTAGE = "./partage-recu";
 
 self.addEventListener("install", (e) => {

@@ -1,8 +1,8 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
-import Bristol from "./App.jsx";
+import Memento from "./App.jsx";
 
-createRoot(document.getElementById("root")).render(<Bristol />);
+createRoot(document.getElementById("root")).render(<Memento />);
 
 // Le service worker sert l'app hors-ligne ; un échec d'enregistrement
 // (page ouverte en file://, navigateur ancien) ne doit pas casser l'app.

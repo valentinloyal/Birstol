@@ -1,9 +1,9 @@
 {
-  "name": "bristol",
+  "name": "memento",
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "Bristol — fiches de révision, PWA hors-ligne sans serveur ni compte.",
+  "description": "Memento — fiches de révision. PWA locale hors-ligne (build), et version en ligne avec comptes (build:cloud).",
   "scripts": {
     "build": "esbuild src/main.jsx --bundle --minify --format=iife --loader:.jsx=jsx --jsx=automatic --define:process.env.NODE_ENV=\\\"production\\\" --outfile=app.js",
     "test": "node --test",

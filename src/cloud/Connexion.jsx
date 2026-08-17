@@ -55,7 +55,7 @@ export function Connexion({ onConnecte }) {
       <div className="scroll" style={{ display: "flex", flexDirection: "column", justifyContent: "center", paddingBottom: 40 }}>
         <div className="empty">
           <div className="mark">✉</div>
-          <h2 className="display">Bristol</h2>
+          <h2 className="display">Memento</h2>
           <p>
             {etape === "email"
               ? "Entrez votre email, un code de connexion vous sera envoyé."

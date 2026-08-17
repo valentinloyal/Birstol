@@ -10,14 +10,14 @@ import { uid } from "./outils.js";
 export const VERSION = 1;
 
 export function construireSauvegarde(decks) {
-  return { bristol: VERSION, exporte: new Date().toISOString(), paquets: decks };
+  return { memento: VERSION, exporte: new Date().toISOString(), paquets: decks };
 }
 
 /* Nom de fichier daté : deux sauvegardes du même jour s'écrasent, c'est voulu. */
 export function nomSauvegarde(date = new Date()) {
   const deuxChiffres = (n) => String(n).padStart(2, "0");
   const jour = [date.getFullYear(), deuxChiffres(date.getMonth() + 1), deuxChiffres(date.getDate())].join("-");
-  return "bristol-sauvegarde-" + jour + ".json";
+  return "memento-sauvegarde-" + jour + ".json";
 }
 
 const estFiche = (c) => c && typeof c === "object" && typeof c.q === "string" && typeof c.a === "string";
@@ -35,7 +35,7 @@ export function lireSauvegarde(texte) {
   // On accepte aussi le tableau nu, qui est ce que contient localStorage.
   const brut = Array.isArray(j) ? j : j && j.paquets;
   if (!Array.isArray(brut)) {
-    throw new Error("Ce fichier n'est pas une sauvegarde Bristol.");
+    throw new Error("Ce fichier n'est pas une sauvegarde Memento.");
   }
   if (brut.some((d) => d && typeof d === "object" && "q" in d && !("cards" in d))) {
     throw new Error("Ceci est l'export d'un seul paquet. Passez par Importer, pas par Restaurer.");

@@ -1,4 +1,4 @@
-# Bristol — contexte projet
+# Memento — contexte projet
 
 Application web de fiches de révision, installable en PWA, utilisée quotidiennement
 sur un Samsung Android par son unique utilisateur (Valentin, étudiant Epitech Nancy).
@@ -59,9 +59,9 @@ src/components/         Icons, Segments, Install, Home, DeckView, Study,
 tests/                  parse, sauvegarde, revision, partage, cours, astuces — 151 tests
 src/main.jsx            point d'entrée : montage React + enregistrement du SW
 package.json            dépendances de build + script `npm run build`
-sw.js                   cache-first ; constante CACHE = "bristol-vN"
+sw.js                   cache-first ; constante CACHE = "memento-vN"
 manifest.webmanifest    PWA : nom, icônes, standalone, thème #2A0F4C
-icon-{192,512}.png      fiche crème, marge orange, B en Archivo Black Italic sur violet
+icon-{192,512}.png      fiche crème, marge orange, M en Archivo Black Italic sur violet
 icon-maskable-512.png   même dessin, contenu resserré dans la zone sûre d’Android
 publier.bat             crée le dépôt GitHub + active Pages (première fois)
 maj.bat                 git add / commit / push (usage courant)
@@ -75,7 +75,7 @@ reconstruction donne le même bundle d'une machine à l'autre.
 ### Modèle de données
 
 ```js
-// localStorage["bristol:v1"] = JSON d'un tableau de paquets
+// localStorage["memento:v1"] = JSON d'un tableau de paquets
 {
   id: "a1b2c3d4",           // uid() = base36 aléatoire
   name: "Java-socle-jour0",
@@ -99,7 +99,7 @@ reconstruction donne le même bundle d'une machine à l'autre.
 
 | Geste | Où | Contenu | Sert à |
 |---|---|---|---|
-| **Exporter toutes mes fiches** | accueil, bouton ⋮ | `{ bristol: 1, exporte, paquets: [...] }` — tout, identifiants, `box` et dates compris | remonter la base à l'identique après un nettoyage du navigateur |
+| **Exporter toutes mes fiches** | accueil, bouton ⋮ | `{ memento: 1, exporte, paquets: [...] }` — tout, identifiants, `box` et dates compris | remonter la base à l'identique après un nettoyage du navigateur |
 | **Exporter en JSON** | menu d'un paquet | `[{ q, a }, ...]` — les seules questions et réponses | ressortir un paquet, le réimporter, le partager |
 
 « Restaurer » **remplace** toute la base, après un écran de confirmation qui annonce
@@ -257,13 +257,13 @@ recevoir des fichiers. Le chemin est en trois temps :
 
 1. Android poste le partage sur `./partage`.
 2. `sw.js` intercepte ce POST, vide le formulaire dans un cache dédié
-   (`bristol-partage`), et redirige vers `./index.html?partage=recu`.
+   (`memento-partage`), et redirige vers `./index.html?partage=recu`.
 3. `partage.js` relève cette boîte au démarrage, **la vide**, et ouvre la feuille
    d'import déjà remplie.
 
 Trois précautions à ne pas défaire :
 
-- Le cache `bristol-partage` **doit être épargné** par le ménage de l'événement
+- Le cache `memento-partage` **doit être épargné** par le ménage de l'événement
   `activate`, qui efface tous les caches sauf `CACHE`. Le POST arrive avant que la
   page ne soit ouverte : effacer ce cache perdrait le partage.
 - `recevoirPartage` est entièrement enveloppée dans un `try` et redirige **quoi
@@ -278,7 +278,7 @@ Trois précautions à ne pas défaire :
 pas dans l'environnement de vérification local. Ce qui a été vérifié ici, c'est la
 relève de la boîte et tout ce qui suit, en y déposant un partage à la main.
 
-Le format attendu des LLM est documenté dans `bristol-format-fiches.md`, hors dépôt,
+Le format attendu des LLM est documenté dans `memento-format-fiches.md`, hors dépôt,
 utilisé comme connaissance de projet côté Claude.
 
 ---

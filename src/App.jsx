@@ -23,11 +23,11 @@ import { RattacherSheet } from "./components/RattacherSheet.jsx";
 import { LotSheet } from "./components/LotSheet.jsx";
 
 /* ------------------------------------------------------------------ */
-/*  Bristol — fiches de révision                                       */
+/*  Memento — fiches de révision                                       */
 /*  Thème : violet profond, titres orange italique, fiche papier réglée */
 /* ------------------------------------------------------------------ */
 
-export default function Bristol() {
+export default function Memento() {
   const [decks, setDecks] = useState([]);
   const [ready, setReady] = useState(false);
   const [view, setView] = useState({ name: "home" });
